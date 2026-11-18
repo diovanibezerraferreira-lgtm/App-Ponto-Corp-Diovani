@@ -347,39 +347,11 @@
               <span id="auto-detect-badge" class="text-[11px] font-medium text-brand-600 bg-brand-50 px-2 py-0.5 rounded-md">Sugerido automaticamente</span>
             </div>
             <div class="grid grid-cols-2 gap-2" id="punch-type-selector">
-              <button type="button" data-type="entrada" onclick="selectPunchType('entrada')" class="punch-type-btn py-2.5 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition">
-                <i data-lucide="log-in" class="w-3.5 h-3.5"></i> Entrada
+              <button type="button" data-type="entrada" onclick="selectPunchType('entrada')" class="punch-type-btn py-3 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+                <i data-lucide="log-in" class="w-4 h-4"></i> Entrada
               </button>
-              <button type="button" data-type="saida_almoco" onclick="selectPunchType('saida_almoco')" class="punch-type-btn py-2.5 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition">
-                <i data-lucide="utensils" class="w-3.5 h-3.5"></i> Saída Almoço
-              </button>
-              <button type="button" data-type="volta_almoco" onclick="selectPunchType('volta_almoco')" class="punch-type-btn py-2.5 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition">
-                <i data-lucide="coffee" class="w-3.5 h-3.5"></i> Volta Almoço
-              </button>
-              <button type="button" data-type="saida" onclick="selectPunchType('saida')" class="punch-type-btn py-2.5 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition">
-                <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Saída Final
-              </button>
-            </div>
-          </div>
-
-          <!-- Botão Principal de Registrar Ponto -->
-          <div class="flex flex-col items-center justify-center py-2">
-            <div class="relative flex items-center justify-center">
-              <div id="punch-pulse-ring" class="hidden absolute inset-0 rounded-full bg-emerald-500 pulse-ring"></div>
-              <button id="btn-register-punch" onclick="registerPunch()" disabled
-                class="relative w-40 h-40 rounded-full bg-slate-300 text-slate-500 shadow-md flex flex-col items-center justify-center gap-1.5 transition-all cursor-not-allowed border-4 border-white">
-                <i data-lucide="lock" id="btn-punch-icon" class="w-11 h-11"></i>
-                <span class="font-bold text-base tracking-wide" id="btn-punch-title">DIGITE O PIN</span>
-                <span id="btn-punch-label" class="text-[11px] font-medium bg-black/10 px-2.5 py-0.5 rounded-full">Bloqueado</span>
-              </button>
-            </div>
-
-            <!-- Localização GPS Capturada -->
-            <div class="mt-4 flex items-center gap-1.5 text-xs text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full max-w-full">
-              <i data-lucide="map-pin" id="gps-pin-icon" class="w-3.5 h-3.5 text-emerald-600 shrink-0"></i>
-              <span id="gps-location-text" class="truncate">Obtendo localização GPS...</span>
-              <button onclick="captureRealGPS(true)" title="Atualizar GPS Real" class="text-brand-600 hover:text-brand-800 ml-1 shrink-0">
-                <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+              <button type="button" data-type="saida" onclick="selectPunchType('saida')" class="punch-type-btn py-3 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+                <i data-lucide="log-out" class="w-4 h-4"></i> Saída
               </button>
             </div>
           </div>
@@ -480,9 +452,7 @@
             <label class="block text-xs font-semibold text-slate-700 mb-1">Tipo da Marcação</label>
             <select id="req-type" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:ring-2 focus:ring-brand-500 outline-none">
               <option value="entrada">Entrada</option>
-              <option value="saida_almoco">Saída Almoço</option>
-              <option value="volta_almoco">Volta Almoço</option>
-              <option value="saida">Saída Final</option>
+              <option value="saida">Saída</option>
             </select>
           </div>
 
@@ -868,6 +838,29 @@
             <p>2. Compartilhe o link acima com a equipe e oriente a tocar em <strong>"Instalar App"</strong> (Adicionar à Tela Inicial).</p>
             <p>3. Acompanhe batidas em tempo real e feche o mês na aba <strong>Espelho de Ponto</strong> exportando em PDF ou CSV.</p>
           </div>
+
+          <!-- Zona de Manutenção / Zerar Dados -->
+          <div class="bg-rose-50/70 rounded-2xl border border-rose-200 p-5 text-xs space-y-3">
+            <div class="flex items-center gap-2 text-rose-800 font-bold text-sm">
+              <i data-lucide="trash-2" class="w-4 h-4 text-rose-600"></i>
+              <span>Zerar Dados do Sistema</span>
+            </div>
+            <p class="text-rose-700 leading-relaxed">
+              Remova registros de teste para iniciar a operação real da empresa. Esta ação apaga os dados na nuvem imediatamente.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-2 pt-1">
+              <button type="button" onclick="openClearDataModal('punches_only')"
+                class="flex-1 py-2.5 px-3 rounded-xl bg-white hover:bg-rose-100 text-rose-700 border border-rose-300 font-semibold transition flex items-center justify-center gap-1.5">
+                <i data-lucide="eraser" class="w-3.5 h-3.5"></i>
+                <span>Zerar Só Batidas</span>
+              </button>
+              <button type="button" onclick="openClearDataModal('full_wipe')"
+                class="flex-1 py-2.5 px-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold shadow-sm transition flex items-center justify-center gap-1.5">
+                <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+                <span>Zerar Tudo</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1056,6 +1049,47 @@
       </div>
     </div>
 
+    <!-- =================================================================== -->
+    <!-- 10. MODAL CONFIRMAÇÃO PARA ZERAR DADOS                              -->
+    <!-- =================================================================== -->
+    <div id="modal-clear-data" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+              <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <h3 id="clear-data-title" class="font-bold text-base text-slate-900">Confirmar Limpeza de Dados</h3>
+              <p class="text-xs text-rose-600 font-medium">Ação irreversível na nuvem</p>
+            </div>
+          </div>
+          <button type="button" onclick="closeModal('modal-clear-data')" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <p id="clear-data-description" class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
+          Tem certeza que deseja continuar?
+        </p>
+
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-5">
+          <label class="block text-[11px] font-semibold text-slate-700 mb-1">Digite <strong class="font-mono text-rose-600">ZERAR</strong> para confirmar:</label>
+          <input type="text" id="clear-data-confirm-input" placeholder="ZERAR"
+            class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm font-mono uppercase focus:ring-2 focus:ring-rose-500 outline-none" />
+        </div>
+
+        <div class="flex gap-3">
+          <button type="button" onclick="closeModal('modal-clear-data')" class="flex-1 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-50">
+            Cancelar
+          </button>
+          <button type="button" onclick="executeClearData()" class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold shadow-sm transition">
+            Confirmar e Zerar
+          </button>
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <!-- =================================================================== -->
@@ -1122,7 +1156,9 @@
       selectedPunchType: 'entrada',
       currentGPSLocation: 'Aguardando leitura GPS...',
       lastReceiptHash: '',
-      isAdminAuthenticated: false
+      isAdminAuthenticated: false,
+      pendingClearMode: 'punches_only',
+      skipAutoSeedOnce: false
     };
 
     function getCollectionRef(colName) {
@@ -1522,10 +1558,13 @@
         async (snapshot) => {
           if (!employeesChecked && snapshot.empty) {
             employeesChecked = true;
-            await seedCloudDemoData(false);
-            return;
+            if (!state.skipAutoSeedOnce) {
+              await seedCloudDemoData(false);
+              return;
+            }
           }
           employeesChecked = true;
+          state.skipAutoSeedOnce = false;
 
           state.employees = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
           state.employees.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
@@ -1611,6 +1650,82 @@
       showToast('Dados de demonstração restaurados na nuvem!', 'success');
     }
 
+    function openClearDataModal(mode) {
+      state.pendingClearMode = mode;
+      const titleEl = document.getElementById('clear-data-title');
+      const descEl = document.getElementById('clear-data-description');
+      const inputEl = document.getElementById('clear-data-confirm-input');
+
+      if (inputEl) inputEl.value = '';
+
+      if (mode === 'full_wipe') {
+        if (titleEl) titleEl.textContent = 'Zerar Todos os Dados do Sistema';
+        if (descEl) {
+          descEl.innerHTML = 'Isso vai apagar <strong>todos os funcionários, batidas de ponto, solicitações e logs de auditoria</strong>. Um colaborador administrador padrão será mantido para você começar do zero.';
+        }
+      } else {
+        if (titleEl) titleEl.textContent = 'Zerar Apenas Batidas e Solicitações';
+        if (descEl) {
+          descEl.innerHTML = 'Isso vai apagar <strong>todas as marcações de ponto, solicitações de ajuste e logs</strong>, mantendo intactos os funcionários cadastrados e as configurações da empresa.';
+        }
+      }
+
+      document.getElementById('modal-clear-data')?.classList.remove('hidden');
+      setTimeout(() => inputEl?.focus(), 50);
+      lucide.createIcons();
+    }
+
+    async function executeClearData() {
+      if (!db) return;
+
+      const confirmVal = (document.getElementById('clear-data-confirm-input')?.value || '').trim().toUpperCase();
+      if (confirmVal !== 'ZERAR') {
+        showToast('Digite a palavra ZERAR para confirmar a exclusão.', 'warning');
+        return;
+      }
+
+      const mode = state.pendingClearMode;
+      const batch = writeBatch(db);
+
+      try {
+        state.records.forEach(item => batch.delete(getDocRef('records', item.id)));
+        state.requests.forEach(item => batch.delete(getDocRef('requests', item.id)));
+        state.auditLogs.forEach(item => batch.delete(getDocRef('auditLogs', item.id)));
+
+        if (mode === 'full_wipe') {
+          state.skipAutoSeedOnce = true;
+          state.employees.forEach(item => batch.delete(getDocRef('employees', item.id)));
+          batch.set(getDocRef('employees', 'emp-inicial'), {
+            name: 'Colaborador Exemplo',
+            role: 'Equipe Geral',
+            doc: 'MAT-001',
+            dailyHours: 8,
+            pin: '1234'
+          });
+          state.selectedTimesheetEmployeeIds = ['emp-inicial'];
+        }
+
+        batch.set(getDocRef('auditLogs', `log-${Date.now()}`), {
+          timestamp: new Date().toLocaleString('pt-BR'),
+          admin: 'Administrador RH',
+          action: mode === 'full_wipe' ? 'Base Completa Zerada' : 'Batidas e Solicitações Zeradas',
+          details: 'Limpeza administrativa executada no painel Empresa & Implantação.'
+        });
+
+        await batch.commit();
+        closeModal('modal-clear-data');
+        showToast(
+          mode === 'full_wipe'
+            ? 'Todos os dados foram zerados com sucesso!'
+            : 'Todas as batidas e solicitações foram zeradas!',
+          'success'
+        );
+      } catch (err) {
+        console.error('Erro ao zerar dados:', err);
+        showToast('Erro ao zerar dados na nuvem.', 'error');
+      }
+    }
+
     /**
      * RELÓGIO EM TEMPO REAL & LÓGICA DO APP FUNCIONÁRIO
      */
@@ -1677,9 +1792,6 @@
 
     function detectNextPunchType(todayRec) {
       if (!todayRec || !todayRec.entrada) return 'entrada';
-      if (!todayRec.saida_almoco) return 'saida_almoco';
-      if (!todayRec.volta_almoco) return 'volta_almoco';
-      if (!todayRec.saida) return 'saida';
       return 'saida';
     }
 
@@ -1693,13 +1805,13 @@
       document.querySelectorAll('.punch-type-btn').forEach(btn => {
         const active = btn.dataset.type === type;
         btn.className = active
-          ? 'punch-type-btn py-2.5 px-3 rounded-xl border-2 border-brand-600 bg-brand-50 text-brand-700 text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-xs'
-          : 'punch-type-btn py-2.5 px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs font-semibold flex items-center justify-center gap-1.5 transition';
+          ? 'punch-type-btn py-3 px-3 rounded-xl border-2 border-brand-600 bg-brand-50 text-brand-700 text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-xs'
+          : 'punch-type-btn py-3 px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs font-semibold flex items-center justify-center gap-1.5 transition';
       });
 
       const labelEl = document.getElementById('btn-punch-label');
       if (labelEl) {
-        labelEl.textContent = PUNCH_LABELS[type] || 'Registrar';
+        labelEl.textContent = type === 'saida' ? 'Saída' : (PUNCH_LABELS[type] || 'Registrar');
       }
     }
 
@@ -1796,13 +1908,14 @@
       const workedMins = calculateDayMinutes(todayRec);
       if (totalHoursEl) totalHoursEl.textContent = minutesToHHMM(workedMins);
 
-      const slots = ['entrada', 'saida_almoco', 'volta_almoco', 'saida'];
+      const slots = ['entrada', 'saida'];
       if (todayListEl) {
         todayListEl.innerHTML = slots.map(slot => {
           const val = todayRec ? todayRec[slot] : '';
+          const slotLabel = slot === 'saida' ? 'Saída' : PUNCH_LABELS[slot];
           return `
             <div class="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-slate-200/70 text-xs">
-              <span class="font-medium text-slate-600">${PUNCH_LABELS[slot]}</span>
+              <span class="font-medium text-slate-600">${slotLabel}</span>
               <span class="font-mono font-bold ${val ? 'text-slate-900' : 'text-slate-300'}">${val || '--:--'}</span>
             </div>
           `;
@@ -3009,6 +3122,8 @@
       adminLogout,
       closeModal,
       resetDemoData,
+      openClearDataModal,
+      executeClearData,
       handleDirectPinInput,
       clearDirectPin,
       selectPunchType,
