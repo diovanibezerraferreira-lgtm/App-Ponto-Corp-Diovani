@@ -2663,6 +2663,16 @@
       }
 
       const newId = `emp_${Date.now()}`;
+      const newEmp = {
+        id: newId,
+        name,
+        role,
+        doc: docCode,
+        pin,
+        dailyHours,
+        createdAt: new Date().toISOString()
+      };
+
       try {
         await setDoc(getDocRef('employees', newId), {
           name,
@@ -2670,15 +2680,27 @@
           doc: docCode,
           pin,
           dailyHours,
-          createdAt: new Date().toISOString()
+          createdAt: newEmp.createdAt
         });
+
+        // Atualiza imediatamente a interface e o cache local sem aguardar atraso de rede
+        if (!state.employees.some(emp => emp.id === newId)) {
+          state.employees.push(newEmp);
+        }
+        if (!state.selectedTimesheetEmployeeIds.includes(newId)) {
+          state.selectedTimesheetEmployeeIds.push(newId);
+        }
+        saveOfflineCache();
+        renderAll();
+
         await logAudit(`Cadastrou o colaborador ${name} (${docCode})`);
         e.target.reset();
         document.getElementById('new-emp-hours').value = '8';
         showToast('Colaborador cadastrado com sucesso!', 'success');
       } catch (err) {
-        console.error(err);
-        showToast('Erro ao cadastrar funcionário.', 'error');
+        console.error('Erro ao cadastrar funcionário:', err);
+        const detail = err && err.code ? ` (${err.code})` : '';
+        showToast(`Erro ao salvar no banco de dados${detail}. Verifique a conexão.`, 'error');
       }
     }
 
@@ -2711,6 +2733,12 @@
 
       try {
         await setDoc(getDocRef('employees', empId), { name, role, doc: docCode, pin, dailyHours }, { merge: true });
+        const idx = state.employees.findIndex(emp => emp.id === empId);
+        if (idx >= 0) {
+          state.employees[idx] = { ...state.employees[idx], name, role, doc: docCode, pin, dailyHours };
+          saveOfflineCache();
+          renderAll();
+        }
         await logAudit(`Atualizou cadastro/jornada de ${name}`);
         closeModal('modal-edit-employee');
         showToast('Dados do colaborador atualizados!', 'success');
@@ -2725,6 +2753,10 @@
       const emp = state.employees.find(e => e.id === empId);
       try {
         await deleteDoc(getDocRef('employees', empId));
+        state.employees = state.employees.filter(e => e.id !== empId);
+        state.selectedTimesheetEmployeeIds = state.selectedTimesheetEmployeeIds.filter(id => id !== empId);
+        saveOfflineCache();
+        renderAll();
         await logAudit(`Removeu o colaborador ${emp?.name || empId}`);
         showToast('Colaborador removido.', 'info');
       } catch (err) {
