@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="PontoCorp" />
-  <link id="pwa-manifest-link" rel="manifest" />
+  <link id="pwa-manifest-link" rel="manifest" href="./manifest.json" />
   <link id="pwa-apple-icon" rel="apple-touch-icon" />
   <title>PontoCorp — Controle de Ponto Eletrônico</title>
   <!-- Tailwind CSS -->
@@ -266,14 +266,19 @@
         
         <!-- Cabeçalho do App Mobile -->
         <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-brand-900 text-white p-6 pb-8 rounded-b-3xl shadow-md">
-          <div class="flex items-center justify-between mb-5">
-            <div class="flex items-center gap-2 text-xs font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span id="emp-header-company">PontoCorp • Online</span>
+          <div class="flex items-center justify-between gap-2 mb-5">
+            <div class="flex items-center gap-2 text-xs font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full min-w-0">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+              <span id="emp-header-company" class="truncate">PontoCorp • Online</span>
             </div>
-            <button type="button" id="btn-install-app" onclick="triggerAppInstall()" class="text-[11px] text-emerald-300 hover:text-white font-semibold flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-full transition">
-              <i data-lucide="download" class="w-3 h-3"></i> <span id="btn-install-label">Instalar App</span>
-            </button>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button type="button" onclick="forceCloudRefresh()" title="Sincronizar funcionários e pontos agora" class="text-[11px] text-slate-200 hover:text-white font-semibold flex items-center gap-1 bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-full transition">
+                <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+              </button>
+              <button type="button" id="btn-install-app" onclick="triggerAppInstall()" class="text-[11px] text-emerald-300 hover:text-white font-semibold flex items-center gap-1 bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-full transition">
+                <i data-lucide="download" class="w-3 h-3"></i> <span id="btn-install-label">Instalar App</span>
+              </button>
+            </div>
           </div>
 
           <!-- Identificação por PIN Individual do Colaborador -->
@@ -1105,7 +1110,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, deleteDoc, getDocs, onSnapshot, collection, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     const STORAGE_KEYS = {
       ADMIN_AUTH: 'pontocorp_admin_logged_v1',
@@ -1415,10 +1420,63 @@
         currentUser = auth.currentUser;
         isCloudReady = true;
         attachFirestoreListeners();
+        await fetchInitialCloudSnapshot();
       } catch (err) {
         console.warn('Conexão nuvem indisponível no momento (operando em cache offline):', err);
         isCloudReady = false;
       }
+    }
+
+    async function fetchInitialCloudSnapshot() {
+      if (!db) return;
+      try {
+        const [empSnap, recSnap, cfgSnap] = await Promise.all([
+          getDocs(getCollectionRef('employees')),
+          getDocs(getCollectionRef('records')),
+          getDocs(getCollectionRef('settings'))
+        ]);
+
+        if (!empSnap.empty) {
+          state.employees = empSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        }
+        if (!recSnap.empty) {
+          const cloudRecords = recSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+          const pendingQueue = getOfflineQueue();
+          const mergedMap = new Map(cloudRecords.map(r => [r.id, r]));
+          pendingQueue.forEach(qItem => {
+            const existing = mergedMap.get(qItem.docId) || { id: qItem.docId };
+            mergedMap.set(qItem.docId, { ...existing, ...qItem.payload, id: qItem.docId });
+          });
+          state.records = Array.from(mergedMap.values());
+        }
+        const companyDoc = cfgSnap.docs.find(d => d.id === 'company_profile');
+        if (companyDoc) {
+          state.companySettings = { ...state.companySettings, ...companyDoc.data() };
+        }
+        saveOfflineCache();
+        renderAll();
+      } catch (err) {
+        console.warn('Erro na leitura direta inicial:', err);
+      }
+    }
+
+    async function forceCloudRefresh() {
+      if (!navigator.onLine) {
+        showToast('Sem internet no celular. Conecte-se para atualizar a lista.', 'warning');
+        return;
+      }
+      showToast('Atualizando dados da nuvem...', 'info');
+      if (!db || !isCloudReady) {
+        await initCloudSync();
+      } else {
+        await fetchInitialCloudSnapshot();
+        await syncOfflineQueue();
+      }
+      const pinInput = document.getElementById('emp-direct-pin-input');
+      if (pinInput && pinInput.value.length === 4) {
+        handleDirectPinInput(pinInput.value);
+      }
+      showToast(`Sincronizado! ${state.employees.length} colaborador(es) ativos.`, 'success');
     }
 
     function attachFirestoreListeners() {
@@ -1503,7 +1561,7 @@
     }
 
     function setupPWA() {
-      // Gera ícone PNG real 512x512 via Canvas (exigido pelo Android/Chrome para instalação nativa WebAPK)
+      // Gera ícone PNG 512x512 via Canvas para Apple Touch Icon
       const canvas = document.createElement('canvas');
       canvas.width = 512;
       canvas.height = 512;
@@ -1535,49 +1593,13 @@
       const appleIcon = document.getElementById('pwa-apple-icon');
       if (appleIcon) appleIcon.href = pngIconUrl;
 
-      const baseUrl = `${window.location.origin}${window.location.pathname}`;
-      const manifestData = {
-        id: baseUrl,
-        name: 'PontoCorp — Controle de Ponto',
-        short_name: 'PontoCorp',
-        description: 'Controle de Ponto Eletrônico com modo offline',
-        start_url: `${baseUrl}?mode=employee`,
-        scope: `${window.location.origin}/`,
-        display: 'standalone',
-        orientation: 'portrait',
-        background_color: '#0f172a',
-        theme_color: '#0f172a',
-        icons: [
-          { src: pngIconUrl, sizes: '192x192', type: 'image/png', purpose: 'any' },
-          { src: pngIconUrl, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
-        ]
-      };
-
-      const manifestLink = document.getElementById('pwa-manifest-link');
-      if (manifestLink) {
-        manifestLink.href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifestData));
-      }
-
-      if ('serviceWorker' in navigator) {
-        const swLines = [
-          "const CACHE_NAME = 'pontocorp-offline-v2';",
-          "self.addEventListener('install', (e) => { self.skipWaiting(); });",
-          "self.addEventListener('activate', (e) => { e.waitUntil(self.clients.claim()); });",
-          "self.addEventListener('fetch', (e) => {",
-          "  if (e.request.method !== 'GET') return;",
-          "  e.respondWith(",
-          "    caches.open(CACHE_NAME).then((cache) =>",
-          "      fetch(e.request).then((res) => {",
-          "        if (res && res.status === 200) cache.put(e.request, res.clone());",
-          "        return res;",
-          "      }).catch(() => cache.match(e.request))",
-          "    )",
-          "  );",
-          "});"
-        ];
-        const swBlob = new Blob([swLines.join('\n')], { type: 'application/javascript' });
-        const swUrl = URL.createObjectURL(swBlob);
-        navigator.serviceWorker.register(swUrl).catch(() => {});
+      // Registra o Service Worker real (sw.js) na raiz para liberar instalação WebAPK no Android/Chrome
+      if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+        navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
+          .then((reg) => {
+            reg.update();
+          })
+          .catch(() => {});
       }
     }
 
@@ -2953,7 +2975,8 @@
       openClearDataModal,
       executeClearData,
       resetDemoData,
-      triggerAppInstall
+      triggerAppInstall,
+      forceCloudRefresh
     });
 
     // Listeners de rede e instalação PWA
