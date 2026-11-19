@@ -539,6 +539,14 @@
       deferredInstallPrompt: null
     };
 
+    function safeIcons() {
+      try {
+        if (window.lucide && typeof window.lucide.createIcons === "function") {
+          window.lucide.createIcons();
+        }
+      } catch (_) {}
+    }
+
     // ==================== UTILITÁRIOS ====================
     function showToast(msg) {
       const box = document.getElementById("toast-box");
@@ -700,7 +708,7 @@
       });
       document.getElementById(`view-${view}`).classList.remove("hidden-view");
       if (view === "employee" || view === "admin") fetchFromServer(false);
-      lucide.createIcons();
+      safeIcons();
     };
 
     window.openAdminAccess = function() {
@@ -868,7 +876,7 @@
         ? "✓ Sincronizado na nuvem"
         : "⏳ Salvo offline (enviará ao voltar a rede)";
       document.getElementById("modal-receipt").classList.remove("hidden-view");
-      lucide.createIcons();
+      safeIcons();
     }
 
     // ==================== PAINEL ADMINISTRATIVO ====================
@@ -881,7 +889,7 @@
       document.getElementById(`admin-tab-${tab}`).classList.remove("hidden-view");
       const activeBtn = document.getElementById(`tab-btn-${tab}`);
       activeBtn.className = "px-4 py-2.5 text-sm font-bold border-b-2 border-blue-600 text-blue-600 whitespace-nowrap";
-      lucide.createIcons();
+      safeIcons();
     };
 
     window.setQuickPeriod = function(mode) {
@@ -1052,18 +1060,20 @@
 
       try {
         await setDoc(doc(COL_EMPLOYEES, id), empData);
-        const idx = state.employees.findIndex(e => e.id === id);
-        if (idx >= 0) state.employees[idx] = empData;
-        else state.employees.push(empData);
-        state.employees.sort((a, b) => a.name.localeCompare(b.name));
-        saveLocalCache();
-        refreshAllUI();
-        closeModal("modal-employee");
-        showToast("Funcionário salvo e sincronizado!");
       } catch (err) {
-        console.error(err);
-        showToast("Erro ao salvar no Firebase. Verifique sua internet.");
+        console.error("Erro Firebase saveEmployee:", err);
+        showToast("Não foi possível conectar ao banco. Verifique sua internet.");
+        return;
       }
+
+      const idx = state.employees.findIndex(e => e.id === id);
+      if (idx >= 0) state.employees[idx] = empData;
+      else state.employees.push(empData);
+      state.employees.sort((a, b) => a.name.localeCompare(b.name));
+      saveLocalCache();
+      refreshAllUI();
+      closeModal("modal-employee");
+      showToast("Funcionário salvo e sincronizado!");
     };
 
     window.deleteEmployee = async function(id) {
@@ -1114,14 +1124,16 @@
 
       try {
         await setDoc(doc(COL_PUNCHES, id), punchObj);
-        state.punches.push(punchObj);
-        saveLocalCache();
-        renderTimesheet();
-        closeModal("modal-manual-punch");
-        showToast("Ponto manual lançado com sucesso!");
       } catch (err) {
         showToast("Erro ao salvar lançamento manual.");
+        return;
       }
+
+      state.punches.push(punchObj);
+      saveLocalCache();
+      renderTimesheet();
+      closeModal("modal-manual-punch");
+      showToast("Ponto manual lançado com sucesso!");
     };
 
     window.saveCompanySettings = async function() {
@@ -1131,12 +1143,14 @@
 
       try {
         await setDoc(doc(COL_SETTINGS, "company"), state.company);
-        saveLocalCache();
-        refreshAllUI();
-        showToast("Dados da empresa atualizados!");
       } catch (err) {
         showToast("Erro ao salvar dados da empresa.");
+        return;
       }
+
+      saveLocalCache();
+      refreshAllUI();
+      showToast("Dados da empresa atualizados!");
     };
 
     window.openResetConfirm = function(mode) {
@@ -1210,7 +1224,7 @@
 
       renderEmployeeTodayPunches();
       renderTimesheet();
-      lucide.createIcons();
+      safeIcons();
     }
 
     // ==================== RELÓGIO & PWA ====================
@@ -1283,7 +1297,7 @@
     updateNetworkUI();
     startRealtimeListeners();
     fetchFromServer(false);
-    lucide.createIcons();
+    safeIcons();
   </script>
 </body>
 </html>
