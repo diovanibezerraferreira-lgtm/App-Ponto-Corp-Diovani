@@ -10,15 +10,9 @@
   "theme_color": "#0f172a",
   "icons": [
     {
-      "src": "https://placehold.co/192x192/0f172a/10b981.png?text=PC",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "https://placehold.co/512x512/0f172a/10b981.png?text=PontoCorp",
-      "sizes": "512x512",
-      "type": "image/png",
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ]

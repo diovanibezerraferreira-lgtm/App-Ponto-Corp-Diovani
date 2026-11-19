@@ -1436,19 +1436,17 @@
           getDocs(getCollectionRef('settings'))
         ]);
 
-        if (!empSnap.empty) {
-          state.employees = empSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        }
-        if (!recSnap.empty) {
-          const cloudRecords = recSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-          const pendingQueue = getOfflineQueue();
-          const mergedMap = new Map(cloudRecords.map(r => [r.id, r]));
-          pendingQueue.forEach(qItem => {
-            const existing = mergedMap.get(qItem.docId) || { id: qItem.docId };
-            mergedMap.set(qItem.docId, { ...existing, ...qItem.payload, id: qItem.docId });
-          });
-          state.records = Array.from(mergedMap.values());
-        }
+        state.employees = empSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        const cloudRecords = recSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const pendingQueue = getOfflineQueue();
+        const mergedMap = new Map(cloudRecords.map(r => [r.id, r]));
+        pendingQueue.forEach(qItem => {
+          const existing = mergedMap.get(qItem.docId) || { id: qItem.docId };
+          mergedMap.set(qItem.docId, { ...existing, ...qItem.payload, id: qItem.docId });
+        });
+        state.records = Array.from(mergedMap.values());
+
         const companyDoc = cfgSnap.docs.find(d => d.id === 'company_profile');
         if (companyDoc) {
           state.companySettings = { ...state.companySettings, ...companyDoc.data() };

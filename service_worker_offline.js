@@ -1,8 +1,9 @@
-const CACHE_NAME = 'pontocorp-pwa-v3';
+const CACHE_NAME = 'pontocorp-pwa-v4';
 const ASSETS = [
   '/',
   '/index.html',
-  '/manifest.json'
+  '/manifest.json',
+  '/icon.svg'
 ];
 
 self.addEventListener('install', (event) => {
@@ -23,7 +24,7 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = event.request.url;
-  if (url.includes('firestore.googleapis.com') || url.includes('identitytoolkit.googleapis.com')) {
+  if (url.includes('firestore.googleapis.com') || url.includes('identitytoolkit.googleapis.com') || url.includes('googleapis.com')) {
     return;
   }
   event.respondWith(
