@@ -6,504 +6,321 @@
   <meta name="theme-color" content="#0f172a" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="PontoCorp" />
-  <title>PontoCorp — Controle de Ponto Inteligente</title>
+  <title>PontoCorp — Controle de Ponto</title>
   <link rel="manifest" href="/manifest.json" />
-  <link id="dynamic-apple-icon" rel="apple-touch-icon" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
     body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
     .hidden-view { display: none !important; }
-    @media print {
-      .no-print { display: none !important; }
-      .print-only { display: block !important; }
-      body { background: #fff !important; color: #000 !important; }
-      .print-shadow-none { box-shadow: none !important; border: 1px solid #cbd5e1 !important; }
-    }
+    @media print { .no-print { display: none !important; } }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-  <!-- BARRA SUPERIOR -->
+  <!-- TOPO -->
   <header class="bg-slate-900 text-white shadow-md no-print sticky top-0 z-40">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
-      <div class="flex items-center gap-3 cursor-pointer" onclick="switchView('home')">
-        <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-inner">
-          <i data-lucide="clock-4" class="w-5 h-5 text-white"></i>
-        </div>
-        <div>
-          <span class="font-extrabold text-lg tracking-tight">PontoCorp</span>
-          <span class="hidden sm:inline-block text-xs text-slate-400 border-l border-slate-700 pl-2 ml-2">REP-P Digital</span>
-        </div>
+      <div class="flex items-center gap-2.5 cursor-pointer" onclick="switchView('home')">
+        <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center font-black text-lg">⏱</div>
+        <span class="font-extrabold text-lg">PontoCorp</span>
       </div>
-
       <div class="flex items-center gap-2">
-        <span id="cloud-status-badge" class="hidden sm:inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-          <span id="cloud-dot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-          <span id="cloud-status-text">Conectando...</span>
-        </span>
-        <button onclick="switchView('employee')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs sm:text-sm font-medium transition border border-slate-700">
+        <button type="button" onclick="switchView('employee')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs sm:text-sm font-semibold border border-slate-700">
           App Funcionário
         </button>
-        <button onclick="openAdminAccess()" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs sm:text-sm font-semibold transition shadow">
+        <button type="button" onclick="openAdminAccess()" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-xs sm:text-sm font-semibold">
           Painel Admin
         </button>
       </div>
     </div>
   </header>
 
-  <!-- ==================== TELA INICIAL ==================== -->
+  <!-- TELA INICIAL -->
   <main id="view-home" class="flex-1 flex flex-col items-center justify-center px-4 py-10">
-    <div class="max-w-4xl w-full text-center mb-10">
-      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold mb-4">
-        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Portaria 671 • Conformidade Trabalhista
-      </span>
-      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-3">
-        Controle de Ponto Inteligente
-      </h1>
-      <p class="text-slate-600 max-w-2xl mx-auto text-sm sm:text-base">
-        Selecione o ambiente de acesso abaixo. Utilize o <strong>App do Funcionário</strong> para registrar batidas no celular apenas com o PIN (mesmo sem internet) ou o <strong>Painel Administrador</strong> para auditar o espelho de ponto.
-      </p>
+    <div class="max-w-3xl w-full text-center mb-8">
+      <span class="inline-block px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-bold mb-3">Portaria 671 • REP-P Digital</span>
+      <h1 class="text-3xl font-extrabold text-slate-900 mb-2">Controle de Ponto Inteligente</h1>
+      <p class="text-slate-600 text-sm">Registre o ponto digitando apenas o PIN de 5 dígitos ou acesse o painel administrativo.</p>
     </div>
 
-    <div class="grid md:grid-cols-2 gap-6 max-w-4xl w-full">
-      <!-- Card Funcionário -->
-      <div onclick="switchView('employee')" class="group bg-white rounded-2xl p-7 border border-slate-200 hover:border-emerald-500 shadow-sm hover:shadow-xl transition cursor-pointer flex flex-col justify-between">
+    <div class="grid md:grid-cols-2 gap-6 max-w-3xl w-full">
+      <div onclick="switchView('employee')" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-emerald-500 shadow-sm cursor-pointer flex flex-col justify-between">
         <div>
-          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-5 group-hover:scale-110 transition">
-            <i data-lucide="smartphone" class="w-6 h-6"></i>
-          </div>
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl mb-4">📱</div>
           <h2 class="text-xl font-bold text-slate-900 mb-2">Acesso Funcionário (App)</h2>
-          <p class="text-sm text-slate-600 leading-relaxed mb-6">
-            Marcação rápida de Entrada e Saída digitando apenas o PIN individual de 5 dígitos, com comprovante digital e funcionamento offline com sincronização automática.
-          </p>
+          <p class="text-sm text-slate-600 mb-6">Marcação rápida de Entrada e Saída digitando apenas o PIN individual de 5 dígitos, com funcionamento offline.</p>
         </div>
         <div class="flex items-center justify-between pt-4 border-t border-slate-100">
-          <span class="text-xs font-semibold text-emerald-700">Acesso direto por PIN</span>
-          <span class="px-3 py-1 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-bold group-hover:bg-emerald-600 group-hover:text-white transition">
-            Abrir App →
-          </span>
+          <span class="text-xs font-bold text-emerald-700">Acesso direto por PIN</span>
+          <span class="px-3 py-1 rounded-lg bg-emerald-600 text-white text-xs font-bold">Abrir App →</span>
         </div>
       </div>
 
-      <!-- Card Admin -->
-      <div onclick="openAdminAccess()" class="group bg-white rounded-2xl p-7 border border-slate-200 hover:border-blue-600 shadow-sm hover:shadow-xl transition cursor-pointer flex flex-col justify-between">
+      <div onclick="openAdminAccess()" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-blue-600 shadow-sm cursor-pointer flex flex-col justify-between">
         <div>
-          <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-5 group-hover:scale-110 transition">
-            <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
-          </div>
+          <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center text-2xl mb-4">📊</div>
           <h2 class="text-xl font-bold text-slate-900 mb-2">Acesso Administrador (RH)</h2>
-          <p class="text-sm text-slate-600 leading-relaxed mb-6">
-            Gestão completa da jornada: cadastro de colaboradores, espelho de ponto com filtro por período personalizado, lançamento manual de ponto esquecido e impressão.
-          </p>
+          <p class="text-sm text-slate-600 mb-6">Cadastro de colaboradores, espelho de ponto por período, ajuste manual e impressão.</p>
         </div>
         <div class="flex items-center justify-between pt-4 border-t border-slate-100">
-          <span class="text-xs text-slate-500">Senha padrão: <code class="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-slate-700">admin123</code></span>
-          <span class="px-3 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-bold group-hover:bg-blue-600 group-hover:text-white transition">
-            Gestão & Espelho →
-          </span>
+          <span class="text-xs text-slate-500">Senha: <code class="bg-slate-100 px-1.5 py-0.5 rounded font-mono">admin123</code></span>
+          <span class="px-3 py-1 rounded-lg bg-blue-600 text-white text-xs font-bold">Gestão & Espelho →</span>
         </div>
       </div>
     </div>
   </main>
 
-  <!-- ==================== MODAL SENHA ADMIN ==================== -->
-  <div id="modal-admin-login" class="hidden-view fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-200">
-      <div class="flex items-center justify-between mb-4">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
-            <i data-lucide="lock" class="w-5 h-5"></i>
-          </div>
-          <h3 class="font-bold text-lg text-slate-900">Acesso Restrito RH</h3>
-        </div>
-        <button onclick="closeModal('modal-admin-login')" class="text-slate-400 hover:text-slate-600">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
+  <!-- MODAL LOGIN ADMIN -->
+  <div id="modal-admin-login" class="hidden-view fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-lg text-slate-900">Acesso Restrito RH</h3>
+        <button type="button" onclick="closeModal('modal-admin-login')" class="text-slate-400 font-bold text-lg">✕</button>
       </div>
-      <p class="text-xs text-slate-500 mb-4">Digite a senha administrativa para acessar o Espelho de Ponto e o cadastro de equipe.</p>
-      <input id="admin-password-input" type="password" placeholder="Senha (admin123)" onkeydown="if(event.key==='Enter') verifyAdminPassword()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm mb-2" />
-      <p id="admin-login-error" class="hidden text-xs text-red-600 font-medium mb-3">Senha incorreta. Tente novamente.</p>
-      <div class="flex gap-2 mt-4">
-        <button onclick="closeModal('modal-admin-login')" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancelar</button>
-        <button onclick="verifyAdminPassword()" class="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold shadow">Entrar</button>
+      <input id="admin-password-input" type="password" placeholder="Senha (admin123)" onkeydown="if(event.key==='Enter') verifyAdminPassword()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm outline-none" />
+      <p id="admin-login-error" class="hidden text-xs text-red-600 font-bold">Senha incorreta.</p>
+      <div class="flex gap-2">
+        <button type="button" onclick="closeModal('modal-admin-login')" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold">Cancelar</button>
+        <button type="button" onclick="verifyAdminPassword()" class="flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-bold">Entrar</button>
       </div>
     </div>
   </div>
 
-  <!-- ==================== APP DO FUNCIONÁRIO (MOBILE - SOMENTE PIN) ==================== -->
+  <!-- APP DO FUNCIONÁRIO (SOMENTE PIN) -->
   <section id="view-employee" class="hidden-view flex-1 max-w-md w-full mx-auto px-4 py-5 flex flex-col gap-4">
-    <!-- Barra Status Conexão + Sincronização + Instalar -->
     <div class="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm flex items-center justify-between gap-2">
       <div class="flex items-center gap-2">
         <span id="emp-net-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
         <div>
           <p id="emp-net-label" class="text-xs font-bold text-slate-800">Online • Sincronizado</p>
-          <p id="emp-offline-queue-label" class="text-[11px] text-slate-500">Nenhuma batida pendente</p>
+          <p id="emp-offline-queue-label" class="text-[11px] text-slate-500">Todas as batidas enviadas</p>
         </div>
       </div>
       <div class="flex items-center gap-1.5">
-        <button onclick="forceSyncNow()" title="Atualizar lista de funcionários" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
-          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-        </button>
-        <button id="btn-install-pwa" onclick="triggerPWAInstall()" class="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1 shadow-sm">
-          <i data-lucide="download" class="w-3.5 h-3.5"></i>
-          <span id="btn-install-pwa-text">Instalar App</span>
-        </button>
+        <button type="button" onclick="forceSyncNow(true)" class="px-2.5 py-1.5 rounded-xl bg-slate-100 text-xs font-bold text-slate-700">↻ Atualizar</button>
+        <button type="button" id="btn-install-pwa" onclick="triggerPWAInstall()" class="px-3 py-1.5 rounded-xl bg-blue-600 text-white text-xs font-bold">Instalar App</button>
       </div>
     </div>
 
-    <!-- Relógio Digital -->
-    <div class="bg-slate-900 text-white rounded-3xl p-6 text-center shadow-lg relative overflow-hidden">
-      <p id="emp-company-header" class="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-1">PontoCorp Digital</p>
-      <div id="live-clock" class="text-4xl sm:text-5xl font-extrabold tracking-tight font-mono my-1">00:00:00</div>
-      <p id="live-date" class="text-xs text-slate-400 capitalize">Carregando data...</p>
-      <div class="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800 text-[11px] text-emerald-400">
-        <i data-lucide="map-pin" class="w-3 h-3"></i>
-        <span id="emp-gps-status">Localização verificada</span>
-      </div>
+    <div class="bg-slate-900 text-white rounded-3xl p-6 text-center shadow-lg">
+      <p id="emp-company-header" class="text-xs font-bold uppercase text-blue-400 mb-1">PontoCorp Digital</p>
+      <div id="live-clock" class="text-4xl font-extrabold font-mono my-1">00:00:00</div>
+      <p id="live-date" class="text-xs text-slate-400 capitalize">Carregando...</p>
     </div>
 
-    <!-- Identificação por PIN e Tipo de Marcação -->
     <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
       <div>
         <label class="block text-xs font-bold text-slate-600 uppercase mb-1.5">1. Digite seu PIN (5 dígitos)</label>
         <input id="emp-pin-input" type="password" inputmode="numeric" maxlength="5" placeholder="•••••" oninput="onPinInputChange()" onkeydown="if(event.key==='Enter') registerEmployeePunch()" class="w-full text-center tracking-[0.6em] text-2xl font-mono font-bold py-3.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none" />
         <div id="pin-identified-banner" class="mt-2 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-center text-xs text-slate-500">
-          Digite os 5 dígitos do seu PIN para identificar seu cadastro
+          Digite os 5 dígitos do seu PIN
         </div>
       </div>
 
       <div>
         <label class="block text-xs font-bold text-slate-600 uppercase mb-1.5">2. Tipo de Marcação</label>
         <div class="grid grid-cols-2 gap-3">
-          <button type="button" id="btn-type-entrada" onclick="selectPunchType('Entrada')" class="py-3.5 px-4 rounded-xl border-2 border-emerald-600 bg-emerald-50 text-emerald-800 font-bold text-sm flex items-center justify-center gap-2 transition">
-            <i data-lucide="log-in" class="w-4 h-4"></i> Entrada
-          </button>
-          <button type="button" id="btn-type-saida" onclick="selectPunchType('Saída')" class="py-3.5 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-bold text-sm flex items-center justify-center gap-2 transition">
-            <i data-lucide="log-out" class="w-4 h-4"></i> Saída
-          </button>
+          <button type="button" id="btn-type-entrada" onclick="selectPunchType('Entrada')" class="py-3.5 px-4 rounded-xl border-2 border-emerald-600 bg-emerald-50 text-emerald-800 font-bold text-sm">Entrada</button>
+          <button type="button" id="btn-type-saida" onclick="selectPunchType('Saída')" class="py-3.5 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-bold text-sm">Saída</button>
         </div>
       </div>
 
-      <button onclick="registerEmployeePunch()" class="w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-extrabold text-base shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 transition">
-        <i data-lucide="fingerprint" class="w-5 h-5"></i> CONFIRMAR PONTO AGORA
+      <button type="button" onclick="registerEmployeePunch()" class="w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-base shadow-lg">
+        CONFIRMAR PONTO AGORA
       </button>
     </div>
 
-    <!-- Últimas Batidas de Hoje do Colaborador Identificado -->
     <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
-      <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center justify-between mb-2">
         <h3 class="text-xs font-bold uppercase text-slate-500">Registros de Hoje</h3>
-        <span id="emp-today-count" class="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">0</span>
+        <span id="emp-today-count" class="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100">0</span>
       </div>
-      <div id="emp-today-list" class="space-y-2 text-sm text-slate-500 text-center py-2">
-        Digite seu PIN acima para visualizar suas marcações de hoje.
+      <div id="emp-today-list" class="space-y-2 text-xs text-slate-400 text-center py-2">
+        Digite seu PIN acima para ver suas marcações de hoje.
       </div>
     </div>
   </section>
 
-  <!-- ==================== MODAL COMPROVANTE DE PONTO ==================== -->
-  <div id="modal-receipt" class="hidden-view fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <!-- MODAL COMPROVANTE -->
+  <div id="modal-receipt" class="hidden-view fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4">
     <div class="bg-amber-50 rounded-2xl max-w-sm w-full p-6 shadow-2xl border-2 border-dashed border-amber-300 text-slate-800">
-      <div class="text-center border-b border-dashed border-amber-300 pb-4 mb-4">
-        <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-2">
-          <i data-lucide="check-circle-2" class="w-7 h-7"></i>
-        </div>
-        <h3 class="font-extrabold text-base uppercase tracking-wide">Comprovante de Registro</h3>
-        <p id="rec-sync-note" class="text-xs font-semibold text-emerald-700 mt-0.5">Sincronizado na nuvem</p>
+      <div class="text-center border-b border-dashed border-amber-300 pb-3 mb-3">
+        <div class="text-3xl mb-1">✅</div>
+        <h3 class="font-extrabold text-base uppercase">Comprovante de Registro</h3>
+        <p id="rec-sync-note" class="text-xs font-semibold text-emerald-700 mt-0.5"></p>
       </div>
       <div class="space-y-2 text-xs font-mono">
-        <div class="flex justify-between"><span class="text-slate-500">EMPRESA:</span><span id="rec-company" class="font-bold text-right"></span></div>
-        <div class="flex justify-between"><span class="text-slate-500">COLABORADOR:</span><span id="rec-name" class="font-bold text-right"></span></div>
-        <div class="flex justify-between"><span class="text-slate-500">CARGO:</span><span id="rec-role" class="font-bold text-right"></span></div>
-        <div class="flex justify-between"><span class="text-slate-500">MARCAÇÃO:</span><span id="rec-type" class="font-bold uppercase text-emerald-700"></span></div>
-        <div class="flex justify-between"><span class="text-slate-500">DATA / HORA:</span><span id="rec-datetime" class="font-bold"></span></div>
-        <div class="flex justify-between"><span class="text-slate-500">NSR / HASH:</span><span id="rec-hash" class="font-bold"></span></div>
+        <div class="flex justify-between"><span>EMPRESA:</span><span id="rec-company" class="font-bold"></span></div>
+        <div class="flex justify-between"><span>COLABORADOR:</span><span id="rec-name" class="font-bold"></span></div>
+        <div class="flex justify-between"><span>MARCAÇÃO:</span><span id="rec-type" class="font-bold text-emerald-700"></span></div>
+        <div class="flex justify-between"><span>DATA/HORA:</span><span id="rec-datetime" class="font-bold"></span></div>
+        <div class="flex justify-between"><span>HASH:</span><span id="rec-hash" class="font-bold"></span></div>
       </div>
-      <button onclick="closeModal('modal-receipt')" class="w-full mt-6 py-3 rounded-xl bg-slate-900 text-white font-bold text-sm hover:bg-slate-800">
-        Concluir
-      </button>
+      <button type="button" onclick="closeModal('modal-receipt')" class="w-full mt-5 py-3 rounded-xl bg-slate-900 text-white font-bold text-sm">Concluir</button>
     </div>
   </div>
 
-  <!-- ==================== PAINEL ADMINISTRADOR (RH) ==================== -->
+  <!-- PAINEL ADMINISTRADOR -->
   <section id="view-admin" class="hidden-view flex-1 max-w-6xl w-full mx-auto px-4 py-6">
-    <!-- Cabeçalho Admin -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 no-print">
-      <div>
-        <h1 class="text-2xl font-extrabold text-slate-900">Painel Administrativo (RH)</h1>
-        <p class="text-xs text-slate-500">Gestão em tempo real conectada ao aplicativo dos colaboradores.</p>
-      </div>
-      <div class="flex flex-wrap gap-2">
-        <button onclick="forceSyncNow(true)" class="px-3.5 py-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-sm">
-          <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-blue-600"></i> Atualizar Dados
-        </button>
-        <button onclick="switchView('home')" class="px-3.5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-xs font-bold text-slate-700">
-          Sair do Painel
-        </button>
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-6 no-print">
+      <h1 class="text-2xl font-extrabold text-slate-900">Painel Administrativo (RH)</h1>
+      <div class="flex gap-2">
+        <button type="button" onclick="forceSyncNow(true)" class="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold">↻ Atualizar</button>
+        <button type="button" onclick="switchView('home')" class="px-3.5 py-2 rounded-xl bg-slate-200 text-xs font-bold">Sair</button>
       </div>
     </div>
 
-    <!-- Abas do Painel -->
     <div class="flex gap-2 border-b border-slate-200 mb-6 overflow-x-auto no-print">
-      <button id="tab-btn-timesheet" onclick="switchAdminTab('timesheet')" class="px-4 py-2.5 text-sm font-bold border-b-2 border-blue-600 text-blue-600 whitespace-nowrap">
-        Espelho de Ponto
-      </button>
-      <button id="tab-btn-employees" onclick="switchAdminTab('employees')" class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap">
-        Funcionários (<span id="admin-emp-count">0</span>)
-      </button>
-      <button id="tab-btn-settings" onclick="switchAdminTab('settings')" class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap">
-        Empresa & Manutenção
-      </button>
+      <button type="button" id="tab-btn-timesheet" onclick="switchAdminTab('timesheet')" class="px-4 py-2.5 text-sm font-bold border-b-2 border-blue-600 text-blue-600">Espelho de Ponto</button>
+      <button type="button" id="tab-btn-employees" onclick="switchAdminTab('employees')" class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500">Funcionários (<span id="admin-emp-count">0</span>)</button>
+      <button type="button" id="tab-btn-settings" onclick="switchAdminTab('settings')" class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500">Empresa & Zerar Dados</button>
     </div>
 
-    <!-- ABA 1: ESPELHO DE PONTO -->
-    <div id="admin-tab-timesheet" class="space-y-5">
-      <!-- Filtros -->
-      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm no-print space-y-4">
+    <!-- ABA ESPELHO -->
+    <div id="admin-tab-timesheet" class="space-y-4">
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm no-print space-y-3">
         <div class="grid sm:grid-cols-4 gap-3">
           <div>
             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Colaborador</label>
-            <select id="filter-emp" onchange="renderTimesheet()" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-medium bg-white">
-              <option value="ALL">Todos os Colaboradores</option>
-            </select>
+            <select id="filter-emp" onchange="renderTimesheet()" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm bg-white"><option value="ALL">Todos</option></select>
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Data Inicial</label>
-            <input id="filter-start-date" type="date" onchange="renderTimesheet()" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-medium" />
+            <input id="filter-start-date" type="date" onchange="renderTimesheet()" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm" />
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Data Final</label>
-            <input id="filter-end-date" type="date" onchange="renderTimesheet()" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-medium" />
+            <input id="filter-end-date" type="date" onchange="renderTimesheet()" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm" />
           </div>
           <div class="flex items-end gap-2">
-            <button onclick="openManualPunchModal()" class="flex-1 py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm">
-              <i data-lucide="plus-circle" class="w-4 h-4"></i> Lançar Ponto
-            </button>
-            <button onclick="window.print()" class="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold flex items-center justify-center gap-1.5" title="Imprimir ou Salvar PDF">
-              <i data-lucide="printer" class="w-4 h-4"></i> PDF
-            </button>
+            <button type="button" onclick="openManualPunchModal()" class="flex-1 py-2 px-3 rounded-xl bg-blue-600 text-white text-xs font-bold">+ Lançar Ponto</button>
+            <button type="button" onclick="window.print()" class="py-2 px-3 rounded-xl bg-slate-800 text-white text-xs font-bold">Imprimir</button>
           </div>
         </div>
-
-        <!-- Atalhos de Período -->
-        <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
-          <span class="text-xs font-semibold text-slate-400">Períodos rápidos:</span>
-          <button onclick="setQuickPeriod('today')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-xs font-semibold text-slate-600 transition">Somente Hoje</button>
-          <button onclick="setQuickPeriod('7days')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-xs font-semibold text-slate-600 transition">Últimos 7 dias</button>
-          <button onclick="setQuickPeriod('q1')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-xs font-semibold text-slate-600 transition">1ª Quinzena</button>
-          <button onclick="setQuickPeriod('q2')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-xs font-semibold text-slate-600 transition">2ª Quinzena</button>
-          <button onclick="setQuickPeriod('month')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-xs font-semibold text-slate-600 transition">Mês Atual</button>
+        <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
+          <button type="button" onclick="setQuickPeriod('today')" class="px-2.5 py-1 rounded-lg bg-slate-100 text-xs font-semibold">Hoje</button>
+          <button type="button" onclick="setQuickPeriod('7days')" class="px-2.5 py-1 rounded-lg bg-slate-100 text-xs font-semibold">7 dias</button>
+          <button type="button" onclick="setQuickPeriod('q1')" class="px-2.5 py-1 rounded-lg bg-slate-100 text-xs font-semibold">1ª Quinzena</button>
+          <button type="button" onclick="setQuickPeriod('q2')" class="px-2.5 py-1 rounded-lg bg-slate-100 text-xs font-semibold">2ª Quinzena</button>
+          <button type="button" onclick="setQuickPeriod('month')" class="px-2.5 py-1 rounded-lg bg-slate-100 text-xs font-semibold">Mês Atual</button>
         </div>
       </div>
 
-      <!-- Cabeçalho de Impressão -->
-      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm print-shadow-none">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 mb-4 border-b border-slate-200">
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+        <div class="flex justify-between items-center pb-3 mb-3 border-b border-slate-200">
           <div>
-            <h2 id="sheet-company-name" class="text-lg font-extrabold text-slate-900">Minha Empresa Ltda</h2>
+            <h2 id="sheet-company-name" class="text-lg font-extrabold">Minha Empresa Ltda</h2>
             <p id="sheet-company-doc" class="text-xs text-slate-500">CNPJ: 00.000.000/0001-00</p>
           </div>
-          <div class="text-left sm:text-right">
-            <span class="text-xs font-bold uppercase text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg">Espelho de Ponto Eletrônico</span>
-            <p id="sheet-period-label" class="text-xs text-slate-500 mt-1">Período selecionado</p>
-          </div>
+          <p id="sheet-period-label" class="text-xs font-bold text-blue-700"></p>
         </div>
-
-        <!-- Tabela do Espelho -->
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse text-sm">
-            <thead>
-              <tr class="border-b-2 border-slate-200 text-xs uppercase text-slate-500">
-                <th class="py-2.5 px-3">Data</th>
-                <th class="py-2.5 px-3">Colaborador</th>
-                <th class="py-2.5 px-3">Entradas & Saídas</th>
-                <th class="py-2.5 px-3">Total Trabalhado</th>
-                <th class="py-2.5 px-3">Saldo</th>
-                <th class="py-2.5 px-3 text-right no-print">Ações</th>
-              </tr>
-            </thead>
-            <tbody id="timesheet-tbody" class="divide-y divide-slate-100">
-              <tr><td colspan="6" class="py-8 text-center text-slate-400">Carregando registros...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ABA 2: FUNCIONÁRIOS -->
-    <div id="admin-tab-employees" class="hidden-view space-y-5">
-      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h3 class="font-bold text-slate-900">Equipe Cadastrada</h3>
-          <p class="text-xs text-slate-500">Cada colaborador deve ter um PIN exclusivo de 5 dígitos para bater o ponto.</p>
-        </div>
-        <button onclick="openEmployeeModal()" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold flex items-center gap-2 shadow">
-          <i data-lucide="user-plus" class="w-4 h-4"></i> Novo Funcionário
-        </button>
-      </div>
-
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm">
-            <thead class="bg-slate-50 border-b border-slate-200 text-xs uppercase text-slate-500">
-              <tr>
-                <th class="py-3 px-4">Nome</th>
-                <th class="py-3 px-4">Cargo</th>
-                <th class="py-3 px-4">Carga Horária</th>
-                <th class="py-3 px-4">PIN Exclusivo</th>
-                <th class="py-3 px-4 text-right">Ações</th>
+            <thead>
+              <tr class="border-b border-slate-200 text-xs uppercase text-slate-500">
+                <th class="py-2 px-2">Data</th>
+                <th class="py-2 px-2">Colaborador</th>
+                <th class="py-2 px-2">Batidas</th>
+                <th class="py-2 px-2">Trabalhado</th>
+                <th class="py-2 px-2">Saldo</th>
+                <th class="py-2 px-2 text-right no-print">Ações</th>
               </tr>
             </thead>
-            <tbody id="employees-tbody" class="divide-y divide-slate-100"></tbody>
+            <tbody id="timesheet-tbody" class="divide-y divide-slate-100"></tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- ABA 3: EMPRESA & MANUTENÇÃO -->
-    <div id="admin-tab-settings" class="hidden-view space-y-6">
-      <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm max-w-xl space-y-4">
-        <h3 class="font-bold text-lg text-slate-900">Dados da Empresa (Cabeçalho do Espelho)</h3>
-        <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Razão Social / Nome Fantasia</label>
-          <input id="set-company-name" type="text" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm" />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">CNPJ</label>
-          <input id="set-company-cnpj" type="text" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm" />
-        </div>
-        <button onclick="saveCompanySettings()" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow">
-          Salvar Dados da Empresa
-        </button>
+    <!-- ABA FUNCIONÁRIOS -->
+    <div id="admin-tab-employees" class="hidden-view space-y-4">
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 flex justify-between items-center">
+        <span class="font-bold">Colaboradores (PIN exclusivo de 5 dígitos)</span>
+        <button type="button" onclick="openEmployeeModal()" class="px-4 py-2 rounded-xl bg-blue-600 text-white text-xs font-bold">+ Novo Funcionário</button>
       </div>
+      <div class="bg-white rounded-2xl border border-slate-200 overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-slate-50 border-b text-xs uppercase text-slate-500">
+            <tr><th class="py-3 px-4">Nome</th><th class="py-3 px-4">Cargo</th><th class="py-3 px-4">Carga</th><th class="py-3 px-4">PIN</th><th class="py-3 px-4 text-right">Ações</th></tr>
+          </thead>
+          <tbody id="employees-tbody" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+    </div>
 
-      <!-- Zona de Zerar Dados -->
-      <div class="bg-red-50/70 rounded-2xl p-6 border border-red-200 max-w-xl space-y-4">
-        <div class="flex items-center gap-2.5 text-red-700">
-          <i data-lucide="alert-triangle" class="w-5 h-5"></i>
-          <h3 class="font-bold text-base">Zerar Dados do Sistema</h3>
-        </div>
-        <p class="text-xs text-red-800/80 leading-relaxed">
-          Utilize as opções abaixo para limpar registros de teste antes de iniciar o uso oficial da empresa.
-        </p>
-        <div class="flex flex-wrap gap-3">
-          <button onclick="openResetConfirm('punches')" class="px-4 py-2.5 rounded-xl bg-white border border-red-300 hover:bg-red-100 text-red-700 text-xs font-bold">
-            Zerar Só Batidas (Manter Funcionários)
-          </button>
-          <button onclick="openResetConfirm('all')" class="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow">
-            Zerar Tudo (Limpar Base Completa)
-          </button>
+    <!-- ABA CONFIGURAÇÕES -->
+    <div id="admin-tab-settings" class="hidden-view space-y-6 max-w-xl">
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 space-y-3">
+        <h3 class="font-bold">Dados da Empresa</h3>
+        <input id="set-company-name" type="text" placeholder="Nome da Empresa" class="w-full px-3 py-2 rounded-xl border text-sm" />
+        <input id="set-company-cnpj" type="text" placeholder="CNPJ" class="w-full px-3 py-2 rounded-xl border text-sm" />
+        <button type="button" onclick="saveCompanySettings()" class="px-4 py-2 rounded-xl bg-blue-600 text-white text-xs font-bold">Salvar Empresa</button>
+      </div>
+      <div class="bg-red-50 rounded-2xl p-5 border border-red-200 space-y-3">
+        <h3 class="font-bold text-red-700">Zerar Dados de Teste</h3>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" onclick="executeResetData('punches')" class="px-3.5 py-2 rounded-xl bg-white border border-red-300 text-red-700 text-xs font-bold">Zerar Só Batidas</button>
+          <button type="button" onclick="executeResetData('all')" class="px-3.5 py-2 rounded-xl bg-red-600 text-white text-xs font-bold">Zerar Tudo</button>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ==================== MODAL CADASTRO / EDIÇÃO FUNCIONÁRIO ==================== -->
-  <div id="modal-employee" class="hidden-view fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
-      <div class="flex items-center justify-between">
-        <h3 id="modal-emp-title" class="font-bold text-lg text-slate-900">Novo Funcionário</h3>
-        <button onclick="closeModal('modal-employee')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+  <!-- MODAL FUNCIONÁRIO -->
+  <div id="modal-employee" class="hidden-view fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-3">
+      <div class="flex justify-between items-center">
+        <h3 id="modal-emp-title" class="font-bold text-lg">Novo Funcionário</h3>
+        <button type="button" onclick="closeModal('modal-employee')" class="text-slate-400 font-bold">✕</button>
       </div>
       <input type="hidden" id="emp-edit-id" />
-      <div>
-        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome Completo</label>
-        <input id="emp-form-name" type="text" placeholder="Ex: Maria Silva" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm" />
-      </div>
-      <div>
-        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Cargo / Função</label>
-        <input id="emp-form-role" type="text" placeholder="Ex: Vendedora" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm" />
-      </div>
+      <input id="emp-form-name" type="text" placeholder="Nome Completo" class="w-full px-3 py-2.5 rounded-xl border text-sm" />
+      <input id="emp-form-role" type="text" placeholder="Cargo" class="w-full px-3 py-2.5 rounded-xl border text-sm" />
       <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Carga Diária (horas)</label>
-          <input id="emp-form-hours" type="number" step="0.5" value="8" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm" />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">PIN (5 dígitos)</label>
-          <input id="emp-form-pin" type="text" inputmode="numeric" maxlength="5" placeholder="12345" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-mono font-bold" />
-        </div>
+        <input id="emp-form-hours" type="number" step="0.5" value="8" placeholder="Horas/dia" class="w-full px-3 py-2.5 rounded-xl border text-sm" />
+        <input id="emp-form-pin" type="text" inputmode="numeric" maxlength="5" placeholder="PIN 5 dígitos" class="w-full px-3 py-2.5 rounded-xl border text-sm font-mono font-bold" />
       </div>
       <div class="flex gap-2 pt-2">
-        <button onclick="closeModal('modal-employee')" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600">Cancelar</button>
-        <button onclick="saveEmployee()" class="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow">Salvar</button>
+        <button type="button" onclick="closeModal('modal-employee')" class="flex-1 py-2.5 rounded-xl border text-sm font-semibold">Cancelar</button>
+        <button type="button" onclick="saveEmployee()" class="flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-bold">Salvar</button>
       </div>
     </div>
   </div>
 
-  <!-- ==================== MODAL LANÇAMENTO MANUAL DE PONTO ==================== -->
-  <div id="modal-manual-punch" class="hidden-view fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
-      <div class="flex items-center justify-between">
-        <h3 class="font-bold text-lg text-slate-900">Lançar Ponto Manual</h3>
-        <button onclick="closeModal('modal-manual-punch')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+  <!-- MODAL PONTO MANUAL -->
+  <div id="modal-manual-punch" class="hidden-view fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-3">
+      <div class="flex justify-between items-center">
+        <h3 class="font-bold text-lg">Lançar Ponto Manual</h3>
+        <button type="button" onclick="closeModal('modal-manual-punch')" class="text-slate-400 font-bold">✕</button>
       </div>
-      <div>
-        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Colaborador</label>
-        <select id="manual-emp-select" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm"></select>
-      </div>
+      <select id="manual-emp-select" class="w-full px-3 py-2.5 rounded-xl border text-sm"></select>
       <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Data</label>
-          <input id="manual-date" type="date" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm" />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Horário</label>
-          <input id="manual-time" type="time" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm" />
-        </div>
+        <input id="manual-date" type="date" class="w-full px-3 py-2.5 rounded-xl border text-sm" />
+        <input id="manual-time" type="time" class="w-full px-3 py-2.5 rounded-xl border text-sm" />
       </div>
-      <div>
-        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Tipo</label>
-        <select id="manual-type" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm">
-          <option value="Entrada">Entrada</option>
-          <option value="Saída">Saída</option>
-        </select>
-      </div>
+      <select id="manual-type" class="w-full px-3 py-2.5 rounded-xl border text-sm">
+        <option value="Entrada">Entrada</option>
+        <option value="Saída">Saída</option>
+      </select>
       <div class="flex gap-2 pt-2">
-        <button onclick="closeModal('modal-manual-punch')" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600">Cancelar</button>
-        <button onclick="saveManualPunch()" class="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow">Registrar</button>
+        <button type="button" onclick="closeModal('modal-manual-punch')" class="flex-1 py-2.5 rounded-xl border text-sm font-semibold">Cancelar</button>
+        <button type="button" onclick="saveManualPunch()" class="flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-bold">Registrar</button>
       </div>
     </div>
   </div>
 
-  <!-- ==================== MODAL CONFIRMAÇÃO ZERAR DADOS ==================== -->
-  <div id="modal-reset-confirm" class="hidden-view fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 space-y-4">
-      <h3 class="font-bold text-lg text-red-700">Confirmar Limpeza</h3>
-      <p id="reset-confirm-desc" class="text-sm text-slate-600"></p>
-      <div class="flex gap-2 pt-2">
-        <button onclick="closeModal('modal-reset-confirm')" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600">Cancelar</button>
-        <button onclick="executeResetData()" class="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-bold shadow">Sim, Zerar Agora</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- TOAST DE NOTIFICAÇÃO -->
-  <div id="toast-box" class="fixed bottom-5 right-5 z-50 hidden bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl text-sm font-medium flex items-center gap-2.5 max-w-sm">
-    <i data-lucide="info" class="w-4 h-4 text-blue-400 shrink-0"></i>
+  <!-- TOAST -->
+  <div id="toast-box" class="fixed bottom-5 right-5 z-50 hidden bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl text-sm font-medium max-w-sm">
     <span id="toast-msg"></span>
   </div>
 
-  <!-- ==================== SCRIPT PRINCIPAL (FIREBASE + OFFLINE + PWA) ==================== -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-    import {
-      getFirestore,
-      collection,
-      doc,
-      setDoc,
-      deleteDoc,
-      getDocsFromServer,
-      getDocs,
-      onSnapshot
-    } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+    import { getFirestore, collection, doc, setDoc, deleteDoc, getDocsFromServer, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
-    const FIREBASE_CONFIG = {
+    const app = initializeApp({
       apiKey: "AIzaSyCAbnta7907rP8x8VFZXJ_YSayQ1DlPWeo",
       authDomain: "pontocorp-be6f9.firebaseapp.com",
       projectId: "pontocorp-be6f9",
@@ -511,274 +328,19 @@
       messagingSenderId: "283801703722",
       appId: "1:283801703722:web:7ec5f5e8b51d95df14ba53",
       measurementId: "G-ZF73MLBK6T"
-    };
-
-    const app = initializeApp(FIREBASE_CONFIG);
+    });
     const db = getFirestore(app);
-
     const COL_EMPLOYEES = collection(db, "pontocorp_employees");
     const COL_PUNCHES = collection(db, "pontocorp_punches");
     const COL_SETTINGS = collection(db, "pontocorp_settings");
 
-    const LS_EMP_KEY = "pontocorp_cache_employees_v3";
-    const LS_PUNCH_KEY = "pontocorp_cache_punches_v3";
-    const LS_QUEUE_KEY = "pontocorp_offline_queue_v3";
-    const LS_COMPANY_KEY = "pontocorp_company_v3";
-
     let state = {
-      employees: JSON.parse(localStorage.getItem(LS_EMP_KEY) || "[]"),
-      punches: JSON.parse(localStorage.getItem(LS_PUNCH_KEY) || "[]"),
-      offlineQueue: JSON.parse(localStorage.getItem(LS_QUEUE_KEY) || "[]"),
-      company: JSON.parse(localStorage.getItem(LS_COMPANY_KEY) || '{"name":"Minha Empresa Ltda","cnpj":"00.000.000/0001-00"}'),
+      employees: JSON.parse(localStorage.getItem("pontocorp_cache_employees_v3") || "[]"),
+      punches: JSON.parse(localStorage.getItem("pontocorp_cache_punches_v3") || "[]"),
+      offlineQueue: JSON.parse(localStorage.getItem("pontocorp_offline_queue_v3") || "[]"),
+      company: JSON.parse(localStorage.getItem("pontocorp_company_v3") || '{"name":"Minha Empresa Ltda","cnpj":"00.000.000/0001-00"}'),
       selectedPunchType: "Entrada",
-      pendingResetMode: null,
       deferredInstallPrompt: null
     };
 
-    function safeIcons() {
-      try {
-        if (window.lucide && typeof window.lucide.createIcons === "function") {
-          window.lucide.createIcons();
-        }
-      } catch (_) {}
-    }
-
-    // ==================== UTILITÁRIOS ====================
-    function showToast(msg) {
-      const box = document.getElementById("toast-box");
-      document.getElementById("toast-msg").textContent = msg;
-      box.classList.remove("hidden");
-      clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(() => box.classList.add("hidden"), 3500);
-    }
-
-    function todayISO() {
-      const now = new Date();
-      const off = now.getTimezoneOffset();
-      return new Date(now.getTime() - off * 60000).toISOString().split("T")[0];
-    }
-
-    function formatBRDate(iso) {
-      if (!iso) return "";
-      const [y, m, d] = iso.split("-");
-      return `${d}/${m}/${y}`;
-    }
-
-    function saveLocalCache() {
-      localStorage.setItem(LS_EMP_KEY, JSON.stringify(state.employees));
-      localStorage.setItem(LS_PUNCH_KEY, JSON.stringify(state.punches));
-      localStorage.setItem(LS_QUEUE_KEY, JSON.stringify(state.offlineQueue));
-      localStorage.setItem(LS_COMPANY_KEY, JSON.stringify(state.company));
-    }
-
-    function updateNetworkUI() {
-      const online = navigator.onLine;
-      const dot = document.getElementById("emp-net-dot");
-      const label = document.getElementById("emp-net-label");
-      const qLabel = document.getElementById("emp-offline-queue-label");
-      const cDot = document.getElementById("cloud-dot");
-      const cText = document.getElementById("cloud-status-text");
-
-      if (online) {
-        dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
-        label.textContent = "Online • Sincronizado";
-        cDot.className = "w-2 h-2 rounded-full bg-emerald-400";
-        cText.textContent = "Nuvem Ativa";
-      } else {
-        dot.className = "w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse";
-        label.textContent = "Modo Offline Ativo";
-        cDot.className = "w-2 h-2 rounded-full bg-amber-400";
-        cText.textContent = "Sem Internet";
-      }
-
-      const pending = state.offlineQueue.length;
-      qLabel.textContent = pending > 0
-        ? `${pending} batida(s) aguardando internet para envio`
-        : "Todas as batidas enviadas";
-    }
-
-    // ==================== SINCRONIZAÇÃO FIRESTORE ====================
-    async function flushOfflineQueue() {
-      if (!navigator.onLine || state.offlineQueue.length === 0) return;
-      const queueCopy = [...state.offlineQueue];
-      const remaining = [];
-
-      for (const item of queueCopy) {
-        try {
-          await setDoc(doc(COL_PUNCHES, item.id), item);
-        } catch (err) {
-          remaining.push(item);
-        }
-      }
-
-      state.offlineQueue = remaining;
-      saveLocalCache();
-      updateNetworkUI();
-
-      if (queueCopy.length > remaining.length) {
-        showToast(`${queueCopy.length - remaining.length} batida(s) offline sincronizada(s) com sucesso!`);
-      }
-    }
-
-    async function fetchFromServer(notify = false) {
-      if (!navigator.onLine) {
-        updateNetworkUI();
-        return;
-      }
-
-      try {
-        await flushOfflineQueue();
-
-        let empSnap, punchSnap, setSnap;
-        try {
-          [empSnap, punchSnap, setSnap] = await Promise.all([
-            getDocsFromServer(COL_EMPLOYEES),
-            getDocsFromServer(COL_PUNCHES),
-            getDocsFromServer(COL_SETTINGS)
-          ]);
-        } catch (_) {
-          [empSnap, punchSnap, setSnap] = await Promise.all([
-            getDocs(COL_EMPLOYEES),
-            getDocs(COL_PUNCHES),
-            getDocs(COL_SETTINGS)
-          ]);
-        }
-
-        const emps = [];
-        empSnap.forEach(d => emps.push({ id: d.id, ...d.data() }));
-        emps.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-        state.employees = emps;
-
-        const punches = [];
-        punchSnap.forEach(d => punches.push({ id: d.id, ...d.data() }));
-        state.punches = punches;
-
-        setSnap.forEach(d => {
-          if (d.id === "company") state.company = d.data();
-        });
-
-        saveLocalCache();
-        refreshAllUI();
-        updateNetworkUI();
-
-        if (notify) showToast("Dados atualizados diretamente da nuvem!");
-      } catch (err) {
-        console.error("Erro ao sincronizar:", err);
-        updateNetworkUI();
-      }
-    }
-
-    function startRealtimeListeners() {
-      onSnapshot(COL_EMPLOYEES, (snap) => {
-        const emps = [];
-        snap.forEach(d => emps.push({ id: d.id, ...d.data() }));
-        emps.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-        state.employees = emps;
-        saveLocalCache();
-        refreshAllUI();
-      });
-
-      onSnapshot(COL_PUNCHES, (snap) => {
-        const punches = [];
-        snap.forEach(d => punches.push({ id: d.id, ...d.data() }));
-        state.punches = punches;
-        saveLocalCache();
-        refreshAllUI();
-      });
-
-      onSnapshot(COL_SETTINGS, (snap) => {
-        snap.forEach(d => {
-          if (d.id === "company") {
-            state.company = d.data();
-            saveLocalCache();
-            refreshAllUI();
-          }
-        });
-      });
-    }
-
-    // ==================== NAVEGAÇÃO & MODAIS ====================
-    window.switchView = function(view) {
-      ["home", "employee", "admin"].forEach(v => {
-        document.getElementById(`view-${v}`).classList.add("hidden-view");
-      });
-      document.getElementById(`view-${view}`).classList.remove("hidden-view");
-      if (view === "employee") {
-        document.getElementById("emp-pin-input").value = "";
-        onPinInputChange();
-        fetchFromServer(false);
-        setTimeout(() => document.getElementById("emp-pin-input").focus(), 100);
-      } else if (view === "admin") {
-        fetchFromServer(false);
-      }
-      safeIcons();
-    };
-
-    window.openAdminAccess = function() {
-      document.getElementById("admin-password-input").value = "";
-      document.getElementById("admin-login-error").classList.add("hidden");
-      document.getElementById("modal-admin-login").classList.remove("hidden-view");
-      setTimeout(() => document.getElementById("admin-password-input").focus(), 100);
-    };
-
-    window.verifyAdminPassword = function() {
-      const val = document.getElementById("admin-password-input").value;
-      if (val === "admin123") {
-        closeModal("modal-admin-login");
-        switchView("admin");
-      } else {
-        document.getElementById("admin-login-error").classList.remove("hidden");
-      }
-    };
-
-    window.closeModal = function(id) {
-      document.getElementById(id).classList.add("hidden-view");
-    };
-
-    window.forceSyncNow = function(notify = true) {
-      fetchFromServer(notify);
-    };
-
-    // ==================== APP DO FUNCIONÁRIO (SOMENTE PIN) ====================
-    window.selectPunchType = function(type) {
-      state.selectedPunchType = type;
-      const btnIn = document.getElementById("btn-type-entrada");
-      const btnOut = document.getElementById("btn-type-saida");
-
-      if (type === "Entrada") {
-        btnIn.className = "py-3.5 px-4 rounded-xl border-2 border-emerald-600 bg-emerald-50 text-emerald-800 font-bold text-sm flex items-center justify-center gap-2 transition";
-        btnOut.className = "py-3.5 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-bold text-sm flex items-center justify-center gap-2 transition";
-      } else {
-        btnOut.className = "py-3.5 px-4 rounded-xl border-2 border-amber-600 bg-amber-50 text-amber-800 font-bold text-sm flex items-center justify-center gap-2 transition";
-        btnIn.className = "py-3.5 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-bold text-sm flex items-center justify-center gap-2 transition";
-      }
-    };
-
-    window.onPinInputChange = function() {
-      const pinInput = document.getElementById("emp-pin-input");
-      const banner = document.getElementById("pin-identified-banner");
-      const pin = pinInput ? pinInput.value.trim() : "";
-
-      if (pin.length < 5) {
-        banner.className = "mt-2 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-center text-xs text-slate-500";
-        banner.textContent = "Digite os 5 dígitos do seu PIN para identificar seu cadastro";
-        renderEmployeeTodayPunches(null);
-        return;
-      }
-
-      const emp = state.employees.find(e => String(e.pin) === pin);
-      if (!emp) {
-        banner.className = "mt-2 px-3 py-2 rounded-xl bg-red-50 border border-red-200 text-center text-xs font-bold text-red-700";
-        banner.textContent = "PIN não encontrado. Verifique os 5 dígitos ou atualize (↻).";
-        renderEmployeeTodayPunches(null);
-        return;
-      }
-
-      banner.className = "mt-2 px-3 py-2 rounded-xl bg-blue-50 border border-blue-200 text-center text-xs font-bold text-blue-800";
-      banner.textContent = `Colaborador: ${emp.name} (${emp.role || "Colaborador"})`;
-      renderEmployeeTodayPunches(emp.id);
-    };
-
-    function renderEmployeeTodayPunches(empId) {
-      const listEl = document.getElementById("emp-today-list");
-      const countEl = document.getElementById
+    function showToast(msg)
