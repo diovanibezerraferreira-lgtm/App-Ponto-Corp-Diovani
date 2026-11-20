@@ -343,4 +343,335 @@
       deferredInstallPrompt: null
     };
 
-    function showToast(msg)
+    function showToast(msg) {
+      const box = document.getElementById("toast-box");
+      document.getElementById("toast-msg").textContent = msg;
+      box.classList.remove("hidden");
+      clearTimeout(window._tTimer);
+      window._tTimer = setTimeout(() => box.classList.add("hidden"), 3500);
+    }
+
+    function todayISO() {
+      const n = new Date();
+      return new Date(n.getTime() - n.getTimezoneOffset() * 60000).toISOString().split("T")[0];
+    }
+
+    function formatBRDate(iso) {
+      if (!iso) return "";
+      const [y, m, d] = iso.split("-");
+      return `${d}/${m}/${y}`;
+    }
+
+    function saveLocalCache() {
+      localStorage.setItem("pontocorp_cache_employees_v3", JSON.stringify(state.employees));
+      localStorage.setItem("pontocorp_cache_punches_v3", JSON.stringify(state.punches));
+      localStorage.setItem("pontocorp_offline_queue_v3", JSON.stringify(state.offlineQueue));
+      localStorage.setItem("pontocorp_company_v3", JSON.stringify(state.company));
+    }
+
+    function updateNetworkUI() {
+      const online = navigator.onLine;
+      document.getElementById("emp-net-dot").className = online ? "w-2.5 h-2.5 rounded-full bg-emerald-500" : "w-2.5 h-2.5 rounded-full bg-amber-500";
+      document.getElementById("emp-net-label").textContent = online ? "Online • Sincronizado" : "Modo Offline Ativo";
+      document.getElementById("emp-offline-queue-label").textContent = state.offlineQueue.length > 0 ? `${state.offlineQueue.length} batida(s) pendente(s)` : "Todas as batidas enviadas";
+    }
+
+    async function flushOfflineQueue() {
+      if (!navigator.onLine || state.offlineQueue.length === 0) return;
+      const copy = [...state.offlineQueue], rem = [];
+      for (const item of copy) {
+        try { await setDoc(doc(COL_PUNCHES, item.id), item); } catch (_) { rem.push(item); }
+      }
+      state.offlineQueue = rem;
+      saveLocalCache();
+      updateNetworkUI();
+    }
+
+    async function fetchFromServer(notify = false) {
+      if (!navigator.onLine) { updateNetworkUI(); return; }
+      try {
+        await flushOfflineQueue();
+        let eS, pS, sS;
+        try { [eS, pS, sS] = await Promise.all([getDocsFromServer(COL_EMPLOYEES), getDocsFromServer(COL_PUNCHES), getDocsFromServer(COL_SETTINGS)]); }
+        catch (_) { [eS, pS, sS] = await Promise.all([getDocs(COL_EMPLOYEES), getDocs(COL_PUNCHES), getDocs(COL_SETTINGS)]); }
+        state.employees = []; eS.forEach(d => state.employees.push({ id: d.id, ...d.data() }));
+        state.employees.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+        state.punches = []; pS.forEach(d => state.punches.push({ id: d.id, ...d.data() }));
+        sS.forEach(d => { if (d.id === "company") state.company = d.data(); });
+        saveLocalCache();
+        refreshAllUI();
+        if (notify) showToast("Dados sincronizados!");
+      } catch (_) {}
+      updateNetworkUI();
+    }
+
+    window.switchView = function(view) {
+      ["home", "employee", "admin"].forEach(v => document.getElementById(`view-${v}`).classList.add("hidden-view"));
+      document.getElementById(`view-${view}`).classList.remove("hidden-view");
+      if (view === "employee") {
+        document.getElementById("emp-pin-input").value = "";
+        onPinInputChange();
+        fetchFromServer(false);
+      } else if (view === "admin") {
+        fetchFromServer(false);
+      }
+    };
+
+    window.openAdminAccess = function() {
+      document.getElementById("admin-password-input").value = "";
+      document.getElementById("admin-login-error").classList.add("hidden");
+      document.getElementById("modal-admin-login").classList.remove("hidden-view");
+    };
+
+    window.verifyAdminPassword = function() {
+      if (document.getElementById("admin-password-input").value === "admin123") {
+        closeModal("modal-admin-login");
+        switchView("admin");
+      } else {
+        document.getElementById("admin-login-error").classList.remove("hidden");
+      }
+    };
+
+    window.closeModal = function(id) { document.getElementById(id).classList.add("hidden-view"); };
+    window.forceSyncNow = function(notify = true) { fetchFromServer(notify); };
+
+    window.selectPunchType = function(type) {
+      state.selectedPunchType = type;
+      const bIn = document.getElementById("btn-type-entrada"), bOut = document.getElementById("btn-type-saida");
+      bIn.className = type === "Entrada" ? "py-3.5 px-4 rounded-xl border-2 border-emerald-600 bg-emerald-50 text-emerald-800 font-bold text-sm" : "py-3.5 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-bold text-sm";
+      bOut.className = type === "Saída" ? "py-3.5 px-4 rounded-xl border-2 border-amber-600 bg-amber-50 text-amber-800 font-bold text-sm" : "py-3.5 px-4 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-bold text-sm";
+    };
+
+    window.onPinInputChange = function() {
+      const pin = (document.getElementById("emp-pin-input").value || "").trim();
+      const banner = document.getElementById("pin-identified-banner");
+      if (pin.length < 5) {
+        banner.className = "mt-2 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-center text-xs text-slate-500";
+        banner.textContent = "Digite os 5 dígitos do seu PIN";
+        renderTodayPunches(null);
+        return;
+      }
+      const emp = state.employees.find(e => String(e.pin) === pin);
+      if (!emp) {
+        banner.className = "mt-2 px-3 py-2 rounded-xl bg-red-50 border border-red-200 text-center text-xs font-bold text-red-700";
+        banner.textContent = "PIN não encontrado. Verifique ou toque em Atualizar.";
+        renderTodayPunches(null);
+        return;
+      }
+      banner.className = "mt-2 px-3 py-2 rounded-xl bg-blue-50 border border-blue-200 text-center text-xs font-bold text-blue-800";
+      banner.textContent = `Colaborador: ${emp.name}`;
+      renderTodayPunches(emp.id);
+    };
+
+    function renderTodayPunches(empId) {
+      const list = document.getElementById("emp-today-list"), cnt = document.getElementById("emp-today-count");
+      if (!empId) { cnt.textContent = "0"; list.innerHTML = "Digite seu PIN acima para ver suas marcações de hoje."; return; }
+      const today = todayISO();
+      const map = new Map();
+      [...state.punches, ...state.offlineQueue].forEach(p => map.set(p.id, p));
+      const mine = Array.from(map.values()).filter(p => p.employeeId === empId && p.date === today).sort((a, b) => a.time.localeCompare(b.time));
+      cnt.textContent = mine.length;
+      selectPunchType(mine.length === 0 || mine[mine.length - 1].type === "Saída" ? "Entrada" : "Saída");
+      list.innerHTML = mine.length === 0 ? "Nenhuma batida hoje." : mine.map(p => `
+        <div class="flex justify-between px-3 py-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-800">
+          <span class="font-bold">${p.type}</span><span class="font-mono font-bold">${p.time}</span>
+        </div>`).join("");
+    }
+
+    window.registerEmployeePunch = async function() {
+      const pin = document.getElementById("emp-pin-input").value.trim();
+      const emp = state.employees.find(e => String(e.pin) === pin);
+      if (!emp) { showToast("Digite um PIN válido de 5 dígitos."); return; }
+      const now = new Date();
+      const punch = {
+        id: `punch_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        employeeId: emp.id, employeeName: emp.name, type: state.selectedPunchType,
+        date: todayISO(), time: now.toTimeString().slice(0, 5),
+        hash: Math.random().toString(36).substring(2, 10).toUpperCase()
+      };
+      document.getElementById("emp-pin-input").value = "";
+      onPinInputChange();
+
+      let synced = false;
+      if (navigator.onLine) {
+        try { await setDoc(doc(COL_PUNCHES, punch.id), punch); state.punches.push(punch); synced = true; }
+        catch (_) { state.offlineQueue.push(punch); }
+      } else { state.offlineQueue.push(punch); }
+      saveLocalCache();
+      updateNetworkUI();
+
+      document.getElementById("rec-company").textContent = state.company.name;
+      document.getElementById("rec-name").textContent = emp.name;
+      document.getElementById("rec-type").textContent = punch.type;
+      document.getElementById("rec-datetime").textContent = `${formatBRDate(punch.date)} ${punch.time}`;
+      document.getElementById("rec-hash").textContent = punch.hash;
+      document.getElementById("rec-sync-note").textContent = synced ? "✓ Sincronizado na nuvem" : "⏳ Salvo offline";
+      document.getElementById("modal-receipt").classList.remove("hidden-view");
+    };
+
+    window.switchAdminTab = function(tab) {
+      ["timesheet", "employees", "settings"].forEach(t => {
+        document.getElementById(`admin-tab-${t}`).classList.add("hidden-view");
+        document.getElementById(`tab-btn-${t}`).className = "px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500";
+      });
+      document.getElementById(`admin-tab-${tab}`).classList.remove("hidden-view");
+      document.getElementById(`tab-btn-${tab}`).className = "px-4 py-2.5 text-sm font-bold border-b-2 border-blue-600 text-blue-600";
+    };
+
+    window.setQuickPeriod = function(mode) {
+      const now = new Date(), y = now.getFullYear(), m = String(now.getMonth() + 1).padStart(2, "0"), t = todayISO();
+      let s = t, e = t;
+      if (mode === "7days") s = new Date(now.getTime() - 6 * 86400000).toISOString().split("T")[0];
+      else if (mode === "q1") { s = `${y}-${m}-01`; e = `${y}-${m}-15`; }
+      else if (mode === "q2") { s = `${y}-${m}-16`; e = `${y}-${m}-${String(new Date(y, now.getMonth() + 1, 0).getDate()).padStart(2, "0")}`; }
+      else if (mode === "month") { s = `${y}-${m}-01`; e = `${y}-${m}-${String(new Date(y, now.getMonth() + 1, 0).getDate()).padStart(2, "0")}`; }
+      document.getElementById("filter-start-date").value = s;
+      document.getElementById("filter-end-date").value = e;
+      renderTimesheet();
+    };
+
+    window.renderTimesheet = function() {
+      const empF = document.getElementById("filter-emp").value, sD = document.getElementById("filter-start-date").value, eD = document.getElementById("filter-end-date").value;
+      document.getElementById("sheet-company-name").textContent = state.company.name;
+      document.getElementById("sheet-company-doc").textContent = `CNPJ: ${state.company.cnpj}`;
+      document.getElementById("sheet-period-label").textContent = sD && eD ? `${formatBRDate(sD)} a ${formatBRDate(eD)}` : "";
+      let list = [...state.punches];
+      if (empF !== "ALL") list = list.filter(p => p.employeeId === empF);
+      if (sD) list = list.filter(p => p.date >= sD);
+      if (eD) list = list.filter(p => p.date <= eD);
+      const tbody = document.getElementById("timesheet-tbody");
+      if (!list.length) { tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400">Sem registros neste período.</td></tr>`; return; }
+
+      const groups = new Map();
+      list.forEach(p => {
+        const k = `${p.date}__${p.employeeId}`;
+        if (!groups.has(k)) groups.set(k, { date: p.date, employeeId: p.employeeId, employeeName: p.employeeName, punches: [] });
+        groups.get(k).punches.push(p);
+      });
+
+      tbody.innerHTML = Array.from(groups.values()).sort((a, b) => b.date.localeCompare(a.date)).map(g => {
+        g.punches.sort((a, b) => a.time.localeCompare(b.time));
+        const emp = state.employees.find(e => e.id === g.employeeId);
+        const exp = ((emp ? Number(emp.dailyHours) : 8) || 8) * 60;
+        let worked = 0;
+        for (let i = 0; i < g.punches.length - 1; i += 2) {
+          const [h1, m1] = g.punches[i].time.split(":").map(Number), [h2, m2] = g.punches[i + 1].time.split(":").map(Number);
+          worked += Math.max(0, (h2 * 60 + m2) - (h1 * 60 + m1));
+        }
+        const diff = worked - exp, abs = Math.abs(diff);
+        const badges = g.punches.map(p => `<span class="inline-block px-2 py-0.5 rounded text-xs font-mono font-bold ${p.type === "Entrada" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"} mr-1">${p.type[0]}:${p.time} <button type="button" onclick="deletePunch('${p.id}')" class="no-print text-red-600">×</button></span>`).join("");
+        return `<tr>
+          <td class="py-2.5 px-2 font-mono text-xs">${formatBRDate(g.date)}</td>
+          <td class="py-2.5 px-2 font-bold">${g.employeeName}</td>
+          <td class="py-2.5 px-2">${badges}</td>
+          <td class="py-2.5 px-2 font-mono font-bold">${String(Math.floor(worked/60)).padStart(2,"0")}:${String(worked%60).padStart(2,"0")}h</td>
+          <td class="py-2.5 px-2 font-mono text-xs font-bold ${diff >= 0 ? "text-emerald-700" : "text-red-700"}">${diff >= 0 ? "+" : "-"}${String(Math.floor(abs/60)).padStart(2,"0")}:${String(abs%60).padStart(2,"0")}</td>
+          <td class="py-2.5 px-2 text-right no-print"><button type="button" onclick="openManualPunchModal('${g.employeeId}','${g.date}')" class="text-xs font-bold text-blue-600">+ Ajustar</button></td>
+        </tr>`;
+      }).join("");
+    };
+
+    window.deletePunch = async function(id) {
+      try { await deleteDoc(doc(COL_PUNCHES, id)); state.punches = state.punches.filter(p => p.id !== id); saveLocalCache(); renderTimesheet(); } catch (_) {}
+    };
+
+    window.openEmployeeModal = function(empId = null) {
+      document.getElementById("emp-edit-id").value = empId || "";
+      const emp = empId ? state.employees.find(e => e.id === empId) : null;
+      document.getElementById("modal-emp-title").textContent = emp ? "Editar Funcionário" : "Novo Funcionário";
+      document.getElementById("emp-form-name").value = emp ? emp.name : "";
+      document.getElementById("emp-form-role").value = emp ? emp.role : "";
+      document.getElementById("emp-form-hours").value = emp ? emp.dailyHours : 8;
+      document.getElementById("emp-form-pin").value = emp ? emp.pin : "";
+      document.getElementById("modal-employee").classList.remove("hidden-view");
+    };
+
+    window.saveEmployee = async function() {
+      const id = document.getElementById("emp-edit-id").value || `emp_${Date.now()}`;
+      const name = document.getElementById("emp-form-name").value.trim();
+      const role = document.getElementById("emp-form-role").value.trim() || "Colaborador";
+      const dailyHours = Number(document.getElementById("emp-form-hours").value) || 8;
+      const pin = document.getElementById("emp-form-pin").value.trim();
+      if (!name || pin.length !== 5 || isNaN(Number(pin))) { showToast("Informe o nome e um PIN numérico de 5 dígitos."); return; }
+      const dup = state.employees.find(e => String(e.pin) === pin && e.id !== id);
+      if (dup) { showToast(`PIN já usado por ${dup.name}.`); return; }
+      const data = { id, name, role, dailyHours, pin };
+      try { await setDoc(doc(COL_EMPLOYEES, id), data); } catch (_) { showToast("Erro de conexão ao salvar."); return; }
+      const idx = state.employees.findIndex(e => e.id === id);
+      if (idx >= 0) state.employees[idx] = data; else state.employees.push(data);
+      saveLocalCache(); refreshAllUI(); closeModal("modal-employee"); showToast("Funcionário salvo!");
+    };
+
+    window.deleteEmployee = async function(id) {
+      try { await deleteDoc(doc(COL_EMPLOYEES, id)); state.employees = state.employees.filter(e => e.id !== id); saveLocalCache(); refreshAllUI(); } catch (_) {}
+    };
+
+    window.openManualPunchModal = function(empId = "", date = "") {
+      const sel = document.getElementById("manual-emp-select");
+      sel.innerHTML = state.employees.map(e => `<option value="${e.id}">${e.name}</option>`).join("");
+      if (empId) sel.value = empId;
+      document.getElementById("manual-date").value = date || todayISO();
+      document.getElementById("manual-time").value = "08:00";
+      document.getElementById("modal-manual-punch").classList.remove("hidden-view");
+    };
+
+    window.saveManualPunch = async function() {
+      const empId = document.getElementById("manual-emp-select").value, date = document.getElementById("manual-date").value, time = document.getElementById("manual-time").value, type = document.getElementById("manual-type").value;
+      const emp = state.employees.find(e => e.id === empId);
+      if (!emp || !date || !time) return;
+      const punch = { id: `punch_${Date.now()}`, employeeId: emp.id, employeeName: emp.name, type, date, time, hash: "MANUAL" };
+      try { await setDoc(doc(COL_PUNCHES, punch.id), punch); state.punches.push(punch); saveLocalCache(); renderTimesheet(); closeModal("modal-manual-punch"); showToast("Ponto lançado!"); } catch (_) {}
+    };
+
+    window.saveCompanySettings = async function() {
+      state.company = { name: document.getElementById("set-company-name").value.trim() || "Minha Empresa Ltda", cnpj: document.getElementById("set-company-cnpj").value.trim() || "00.000.000/0001-00" };
+      try { await setDoc(doc(COL_SETTINGS, "company"), state.company); saveLocalCache(); refreshAllUI(); showToast("Empresa salva!"); } catch (_) {}
+    };
+
+    window.executeResetData = async function(mode) {
+      try {
+        for (const p of state.punches) await deleteDoc(doc(COL_PUNCHES, p.id));
+        state.punches = []; state.offlineQueue = [];
+        if (mode === "all") { for (const e of state.employees) await deleteDoc(doc(COL_EMPLOYEES, e.id)); state.employees = []; }
+        saveLocalCache(); refreshAllUI(); showToast("Dados zerados!");
+      } catch (_) {}
+    };
+
+    function refreshAllUI() {
+      document.getElementById("emp-company-header").textContent = state.company.name;
+      document.getElementById("set-company-name").value = state.company.name;
+      document.getElementById("set-company-cnpj").value = state.company.cnpj;
+      const fSel = document.getElementById("filter-emp"), cur = fSel.value;
+      fSel.innerHTML = `<option value="ALL">Todos os Colaboradores</option>` + state.employees.map(e => `<option value="${e.id}">${e.name}</option>`).join("");
+      if (cur === "ALL" || state.employees.some(e => e.id === cur)) fSel.value = cur;
+      document.getElementById("admin-emp-count").textContent = state.employees.length;
+      document.getElementById("employees-tbody").innerHTML = state.employees.map(e => `
+        <tr><td class="py-3 px-4 font-bold">${e.name}</td><td class="py-3 px-4">${e.role}</td><td class="py-3 px-4">${e.dailyHours}h</td><td class="py-3 px-4 font-mono font-bold text-blue-700">${e.pin}</td>
+        <td class="py-3 px-4 text-right space-x-2"><button type="button" onclick="openEmployeeModal('${e.id}')" class="text-xs font-bold text-blue-600">Editar</button><button type="button" onclick="deleteEmployee('${e.id}')" class="text-xs font-bold text-red-600">Excluir</button></td></tr>`).join("");
+      onPinInputChange();
+      renderTimesheet();
+    }
+
+    window.triggerPWAInstall = async function() {
+      if (state.deferredInstallPrompt) { state.deferredInstallPrompt.prompt(); state.deferredInstallPrompt = null; }
+      else showToast("Toque nos 3 pontinhos (⋮) do Chrome e escolha 'Instalar aplicativo'.");
+    };
+
+    window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); state.deferredInstallPrompt = e; document.getElementById("btn-install-pwa").textContent = "Instalar Agora"; });
+    window.addEventListener("online", () => fetchFromServer(true));
+    window.addEventListener("offline", updateNetworkUI);
+    setInterval(() => {
+      const n = new Date();
+      document.getElementById("live-clock").textContent = n.toTimeString().slice(0, 8);
+      document.getElementById("live-date").textContent = n.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" });
+    }, 1000);
+
+    onSnapshot(COL_EMPLOYEES, s => { state.employees = []; s.forEach(d => state.employees.push({ id: d.id, ...d.data() })); saveLocalCache(); refreshAllUI(); });
+    onSnapshot(COL_PUNCHES, s => { state.punches = []; s.forEach(d => state.punches.push({ id: d.id, ...d.data() })); saveLocalCache(); refreshAllUI(); });
+
+    setQuickPeriod("month");
+    refreshAllUI();
+    fetchFromServer(false);
+  </script>
+</body>
+</html>
