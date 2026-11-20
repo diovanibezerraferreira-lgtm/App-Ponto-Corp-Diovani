@@ -64,7 +64,7 @@
           <p class="text-sm text-slate-600 mb-6">Cadastro de colaboradores, espelho de ponto por período, ajuste manual e impressão.</p>
         </div>
         <div class="flex items-center justify-between pt-4 border-t border-slate-100">
-          <span class="text-xs text-slate-500">Senha: <code class="bg-slate-100 px-1.5 py-0.5 rounded font-mono">admin123</code></span>
+          <span class="text-xs text-slate-500">Acesso protegido por senha</span>
           <span class="px-3 py-1 rounded-lg bg-blue-600 text-white text-xs font-bold">Gestão & Espelho →</span>
         </div>
       </div>
@@ -78,7 +78,7 @@
         <h3 class="font-bold text-lg text-slate-900">Acesso Restrito RH</h3>
         <button type="button" onclick="closeModal('modal-admin-login')" class="text-slate-400 font-bold text-lg">✕</button>
       </div>
-      <input id="admin-password-input" type="password" placeholder="Senha (admin123)" onkeydown="if(event.key==='Enter') verifyAdminPassword()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm outline-none" />
+      <input id="admin-password-input" type="password" placeholder="Digite a senha de administrador" onkeydown="if(event.key==='Enter') verifyAdminPassword()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm outline-none" />
       <p id="admin-login-error" class="hidden text-xs text-red-600 font-bold">Senha incorreta.</p>
       <div class="flex gap-2">
         <button type="button" onclick="closeModal('modal-admin-login')" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold">Cancelar</button>
@@ -174,7 +174,7 @@
     <div class="flex gap-2 border-b border-slate-200 mb-6 overflow-x-auto no-print">
       <button type="button" id="tab-btn-timesheet" onclick="switchAdminTab('timesheet')" class="px-4 py-2.5 text-sm font-bold border-b-2 border-blue-600 text-blue-600">Espelho de Ponto</button>
       <button type="button" id="tab-btn-employees" onclick="switchAdminTab('employees')" class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500">Funcionários (<span id="admin-emp-count">0</span>)</button>
-      <button type="button" id="tab-btn-settings" onclick="switchAdminTab('settings')" class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500">Empresa & Zerar Dados</button>
+      <button type="button" id="tab-btn-settings" onclick="switchAdminTab('settings')" class="px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500">Empresa & Segurança</button>
     </div>
 
     <!-- ABA ESPELHO -->
@@ -249,14 +249,27 @@
       </div>
     </div>
 
-    <!-- ABA CONFIGURAÇÕES -->
+    <!-- ABA CONFIGURAÇÕES & SENHA ADMIN -->
     <div id="admin-tab-settings" class="hidden-view space-y-6 max-w-xl">
+      <!-- Dados da Empresa -->
       <div class="bg-white rounded-2xl p-5 border border-slate-200 space-y-3">
-        <h3 class="font-bold">Dados da Empresa</h3>
+        <h3 class="font-bold text-slate-900">Dados da Empresa</h3>
         <input id="set-company-name" type="text" placeholder="Nome da Empresa" class="w-full px-3 py-2 rounded-xl border text-sm" />
         <input id="set-company-cnpj" type="text" placeholder="CNPJ" class="w-full px-3 py-2 rounded-xl border text-sm" />
         <button type="button" onclick="saveCompanySettings()" class="px-4 py-2 rounded-xl bg-blue-600 text-white text-xs font-bold">Salvar Empresa</button>
       </div>
+
+      <!-- Alterar Senha do Administrador -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 space-y-3">
+        <h3 class="font-bold text-slate-900">Alterar Senha do Administrador</h3>
+        <p class="text-xs text-slate-500">A nova senha será sincronizada na nuvem e exigida no PC e no celular.</p>
+        <input id="set-admin-pass-current" type="password" placeholder="Senha atual" class="w-full px-3 py-2 rounded-xl border text-sm" />
+        <input id="set-admin-pass-new" type="password" placeholder="Nova senha (mínimo 4 caracteres)" class="w-full px-3 py-2 rounded-xl border text-sm" />
+        <input id="set-admin-pass-confirm" type="password" placeholder="Confirme a nova senha" class="w-full px-3 py-2 rounded-xl border text-sm" />
+        <button type="button" onclick="changeAdminPassword()" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold">Atualizar Senha Admin</button>
+      </div>
+
+      <!-- Zerar Dados -->
       <div class="bg-red-50 rounded-2xl p-5 border border-red-200 space-y-3">
         <h3 class="font-bold text-red-700">Zerar Dados de Teste</h3>
         <div class="flex flex-wrap gap-2">
@@ -339,6 +352,7 @@
       punches: JSON.parse(localStorage.getItem("pontocorp_cache_punches_v3") || "[]"),
       offlineQueue: JSON.parse(localStorage.getItem("pontocorp_offline_queue_v3") || "[]"),
       company: JSON.parse(localStorage.getItem("pontocorp_company_v3") || '{"name":"Minha Empresa Ltda","cnpj":"00.000.000/0001-00"}'),
+      adminPassword: localStorage.getItem("pontocorp_admin_pass_v3") || "admin123",
       selectedPunchType: "Entrada",
       deferredInstallPrompt: null
     };
@@ -367,6 +381,7 @@
       localStorage.setItem("pontocorp_cache_punches_v3", JSON.stringify(state.punches));
       localStorage.setItem("pontocorp_offline_queue_v3", JSON.stringify(state.offlineQueue));
       localStorage.setItem("pontocorp_company_v3", JSON.stringify(state.company));
+      localStorage.setItem("pontocorp_admin_pass_v3", state.adminPassword);
     }
 
     function updateNetworkUI() {
@@ -397,7 +412,10 @@
         state.employees = []; eS.forEach(d => state.employees.push({ id: d.id, ...d.data() }));
         state.employees.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
         state.punches = []; pS.forEach(d => state.punches.push({ id: d.id, ...d.data() }));
-        sS.forEach(d => { if (d.id === "company") state.company = d.data(); });
+        sS.forEach(d => {
+          if (d.id === "company") state.company = d.data();
+          if (d.id === "auth" && d.data().password) state.adminPassword = d.data().password;
+        });
         saveLocalCache();
         refreshAllUI();
         if (notify) showToast("Dados sincronizados!");
@@ -421,14 +439,37 @@
       document.getElementById("admin-password-input").value = "";
       document.getElementById("admin-login-error").classList.add("hidden");
       document.getElementById("modal-admin-login").classList.remove("hidden-view");
+      fetchFromServer(false);
     };
 
     window.verifyAdminPassword = function() {
-      if (document.getElementById("admin-password-input").value === "admin123") {
+      if (document.getElementById("admin-password-input").value === state.adminPassword) {
         closeModal("modal-admin-login");
         switchView("admin");
       } else {
         document.getElementById("admin-login-error").classList.remove("hidden");
+      }
+    };
+
+    window.changeAdminPassword = async function() {
+      const cur = document.getElementById("set-admin-pass-current").value;
+      const next = document.getElementById("set-admin-pass-new").value.trim();
+      const conf = document.getElementById("set-admin-pass-confirm").value.trim();
+
+      if (cur !== state.adminPassword) { showToast("Senha atual incorreta."); return; }
+      if (next.length < 4) { showToast("A nova senha deve ter pelo menos 4 caracteres."); return; }
+      if (next !== conf) { showToast("A confirmação da nova senha não confere."); return; }
+
+      try {
+        await setDoc(doc(COL_SETTINGS, "auth"), { password: next });
+        state.adminPassword = next;
+        saveLocalCache();
+        document.getElementById("set-admin-pass-current").value = "";
+        document.getElementById("set-admin-pass-new").value = "";
+        document.getElementById("set-admin-pass-confirm").value = "";
+        showToast("Senha do administrador alterada com sucesso!");
+      } catch (_) {
+        showToast("Erro de conexão ao salvar nova senha.");
       }
     };
 
@@ -668,6 +709,14 @@
 
     onSnapshot(COL_EMPLOYEES, s => { state.employees = []; s.forEach(d => state.employees.push({ id: d.id, ...d.data() })); saveLocalCache(); refreshAllUI(); });
     onSnapshot(COL_PUNCHES, s => { state.punches = []; s.forEach(d => state.punches.push({ id: d.id, ...d.data() })); saveLocalCache(); refreshAllUI(); });
+    onSnapshot(COL_SETTINGS, s => {
+      s.forEach(d => {
+        if (d.id === "company") state.company = d.data();
+        if (d.id === "auth" && d.data().password) state.adminPassword = d.data().password;
+      });
+      saveLocalCache();
+      refreshAllUI();
+    });
 
     setQuickPeriod("month");
     refreshAllUI();
