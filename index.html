@@ -65,7 +65,7 @@
         Controle de Ponto Inteligente
       </h1>
       <p class="text-slate-600 max-w-2xl mx-auto text-sm sm:text-base">
-        Selecione o ambiente de acesso abaixo. Utilize o <strong>App do Funcionário</strong> para registrar batidas no celular (mesmo sem internet) ou o <strong>Painel Administrador</strong> para auditar o espelho de ponto.
+        Selecione o ambiente de acesso abaixo. Utilize o <strong>App do Funcionário</strong> para registrar batidas no celular apenas com o PIN (mesmo sem internet) ou o <strong>Painel Administrador</strong> para auditar o espelho de ponto.
       </p>
     </div>
 
@@ -78,11 +78,11 @@
           </div>
           <h2 class="text-xl font-bold text-slate-900 mb-2">Acesso Funcionário (App)</h2>
           <p class="text-sm text-slate-600 leading-relaxed mb-6">
-            Interface mobile simplificada para marcação rápida de Entrada e Saída com PIN, GPS, comprovante digital e funcionamento offline com sincronização automática.
+            Marcação rápida de Entrada e Saída digitando apenas o PIN individual de 5 dígitos, com comprovante digital e funcionamento offline com sincronização automática.
           </p>
         </div>
         <div class="flex items-center justify-between pt-4 border-t border-slate-100">
-          <span class="text-xs font-semibold text-emerald-700">Acesso por PIN individual</span>
+          <span class="text-xs font-semibold text-emerald-700">Acesso direto por PIN</span>
           <span class="px-3 py-1 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-bold group-hover:bg-emerald-600 group-hover:text-white transition">
             Abrir App →
           </span>
@@ -134,7 +134,7 @@
     </div>
   </div>
 
-  <!-- ==================== APP DO FUNCIONÁRIO (MOBILE) ==================== -->
+  <!-- ==================== APP DO FUNCIONÁRIO (MOBILE - SOMENTE PIN) ==================== -->
   <section id="view-employee" class="hidden-view flex-1 max-w-md w-full mx-auto px-4 py-5 flex flex-col gap-4">
     <!-- Barra Status Conexão + Sincronização + Instalar -->
     <div class="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm flex items-center justify-between gap-2">
@@ -167,13 +167,14 @@
       </div>
     </div>
 
-    <!-- Seleção de Colaborador e PIN -->
+    <!-- Identificação por PIN e Tipo de Marcação -->
     <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
       <div>
-        <label class="block text-xs font-bold text-slate-600 uppercase mb-1.5">1. Selecione seu Nome</label>
-        <select id="emp-select" onchange="onEmployeeSelectChange()" class="w-full px-3.5 py-3 rounded-xl border border-slate-300 bg-slate-50 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none">
-          <option value="">Carregando colaboradores...</option>
-        </select>
+        <label class="block text-xs font-bold text-slate-600 uppercase mb-1.5">1. Digite seu PIN (5 dígitos)</label>
+        <input id="emp-pin-input" type="password" inputmode="numeric" maxlength="5" placeholder="•••••" oninput="onPinInputChange()" onkeydown="if(event.key==='Enter') registerEmployeePunch()" class="w-full text-center tracking-[0.6em] text-2xl font-mono font-bold py-3.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none" />
+        <div id="pin-identified-banner" class="mt-2 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-center text-xs text-slate-500">
+          Digite os 5 dígitos do seu PIN para identificar seu cadastro
+        </div>
       </div>
 
       <div>
@@ -188,24 +189,19 @@
         </div>
       </div>
 
-      <div>
-        <label class="block text-xs font-bold text-slate-600 uppercase mb-1.5">3. Digite sua Senha (PIN 5 dígitos)</label>
-        <input id="emp-pin-input" type="password" inputmode="numeric" maxlength="5" placeholder="•••••" class="w-full text-center tracking-[0.6em] text-2xl font-mono font-bold py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none" />
-      </div>
-
       <button onclick="registerEmployeePunch()" class="w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-extrabold text-base shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 transition">
         <i data-lucide="fingerprint" class="w-5 h-5"></i> CONFIRMAR PONTO AGORA
       </button>
     </div>
 
-    <!-- Últimas Batidas de Hoje do Colaborador -->
+    <!-- Últimas Batidas de Hoje do Colaborador Identificado -->
     <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
       <div class="flex items-center justify-between mb-3">
-        <h3 class="text-xs font-bold uppercase text-slate-500">Meus Registros de Hoje</h3>
+        <h3 class="text-xs font-bold uppercase text-slate-500">Registros de Hoje</h3>
         <span id="emp-today-count" class="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">0</span>
       </div>
       <div id="emp-today-list" class="space-y-2 text-sm text-slate-500 text-center py-2">
-        Selecione seu nome acima para ver suas marcações de hoje.
+        Digite seu PIN acima para visualizar suas marcações de hoje.
       </div>
     </div>
   </section>
@@ -344,7 +340,7 @@
       <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h3 class="font-bold text-slate-900">Equipe Cadastrada</h3>
-          <p class="text-xs text-slate-500">Todo colaborador cadastrado aqui aparece automaticamente no celular.</p>
+          <p class="text-xs text-slate-500">Cada colaborador deve ter um PIN exclusivo de 5 dígitos para bater o ponto.</p>
         </div>
         <button onclick="openEmployeeModal()" class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold flex items-center gap-2 shadow">
           <i data-lucide="user-plus" class="w-4 h-4"></i> Novo Funcionário
@@ -359,7 +355,7 @@
                 <th class="py-3 px-4">Nome</th>
                 <th class="py-3 px-4">Cargo</th>
                 <th class="py-3 px-4">Carga Horária</th>
-                <th class="py-3 px-4">PIN Acesso</th>
+                <th class="py-3 px-4">PIN Exclusivo</th>
                 <th class="py-3 px-4 text-right">Ações</th>
               </tr>
             </thead>
@@ -707,7 +703,14 @@
         document.getElementById(`view-${v}`).classList.add("hidden-view");
       });
       document.getElementById(`view-${view}`).classList.remove("hidden-view");
-      if (view === "employee" || view === "admin") fetchFromServer(false);
+      if (view === "employee") {
+        document.getElementById("emp-pin-input").value = "";
+        onPinInputChange();
+        fetchFromServer(false);
+        setTimeout(() => document.getElementById("emp-pin-input").focus(), 100);
+      } else if (view === "admin") {
+        fetchFromServer(false);
+      }
       safeIcons();
     };
 
@@ -736,7 +739,7 @@
       fetchFromServer(notify);
     };
 
-    // ==================== APP DO FUNCIONÁRIO ====================
+    // ==================== APP DO FUNCIONÁRIO (SOMENTE PIN) ====================
     window.selectPunchType = function(type) {
       state.selectedPunchType = type;
       const btnIn = document.getElementById("btn-type-entrada");
@@ -751,553 +754,31 @@
       }
     };
 
-    window.onEmployeeSelectChange = function() {
-      renderEmployeeTodayPunches();
-    };
+    window.onPinInputChange = function() {
+      const pinInput = document.getElementById("emp-pin-input");
+      const banner = document.getElementById("pin-identified-banner");
+      const pin = pinInput ? pinInput.value.trim() : "";
 
-    function renderEmployeeTodayPunches() {
-      const empId = document.getElementById("emp-select").value;
-      const listEl = document.getElementById("emp-today-list");
-      const countEl = document.getElementById("emp-today-count");
-
-      if (!empId) {
-        countEl.textContent = "0";
-        listEl.innerHTML = `<p class="text-xs text-slate-400 py-2">Selecione seu nome acima para ver suas marcações de hoje.</p>`;
+      if (pin.length < 5) {
+        banner.className = "mt-2 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-center text-xs text-slate-500";
+        banner.textContent = "Digite os 5 dígitos do seu PIN para identificar seu cadastro";
+        renderEmployeeTodayPunches(null);
         return;
       }
 
-      const today = todayISO();
-      const allPunches = [...state.punches, ...state.offlineQueue];
-      const uniqueMap = new Map();
-      allPunches.forEach(p => uniqueMap.set(p.id, p));
-
-      const mineToday = Array.from(uniqueMap.values())
-        .filter(p => p.employeeId === empId && p.date === today)
-        .sort((a, b) => a.time.localeCompare(b.time));
-
-      countEl.textContent = mineToday.length;
-
-      if (mineToday.length === 0 || mineToday[mineToday.length - 1].type === "Saída") {
-        selectPunchType("Entrada");
-      } else {
-        selectPunchType("Saída");
-      }
-
-      if (mineToday.length === 0) {
-        listEl.innerHTML = `<p class="text-xs text-slate-400 py-2">Nenhuma batida registrada hoje.</p>`;
-        return;
-      }
-
-      listEl.innerHTML = mineToday.map(p => {
-        const isPending = state.offlineQueue.some(q => q.id === p.id);
-        const badgeClass = p.type === "Entrada"
-          ? "bg-emerald-100 text-emerald-800"
-          : "bg-amber-100 text-amber-800";
-        return `
-          <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 border border-slate-100">
-            <div class="flex items-center gap-2">
-              <span class="px-2 py-0.5 rounded-md text-xs font-bold ${badgeClass}">${p.type}</span>
-              ${isPending ? '<span class="text-[10px] font-bold text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded">Offline</span>' : ''}
-            </div>
-            <span class="font-mono font-bold text-slate-800 text-sm">${p.time}</span>
-          </div>
-        `;
-      }).join("");
-    }
-
-    window.registerEmployeePunch = async function() {
-      const empId = document.getElementById("emp-select").value;
-      const pin = document.getElementById("emp-pin-input").value.trim();
-
-      if (!empId) {
-        showToast("Selecione seu nome antes de registrar o ponto.");
-        return;
-      }
-
-      const emp = state.employees.find(e => e.id === empId);
+      const emp = state.employees.find(e => String(e.pin) === pin);
       if (!emp) {
-        showToast("Colaborador não encontrado. Atualize a lista.");
+        banner.className = "mt-2 px-3 py-2 rounded-xl bg-red-50 border border-red-200 text-center text-xs font-bold text-red-700";
+        banner.textContent = "PIN não encontrado. Verifique os 5 dígitos ou atualize (↻).";
+        renderEmployeeTodayPunches(null);
         return;
       }
 
-      if (pin !== String(emp.pin)) {
-        showToast("PIN incorreto! Verifique sua senha de 5 dígitos.");
-        return;
-      }
-
-      const now = new Date();
-      const date = todayISO();
-      const time = now.toTimeString().slice(0, 5);
-      const id = `punch_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
-      const hash = Math.random().toString(36).substring(2, 10).toUpperCase();
-
-      const punchObj = {
-        id,
-        employeeId: emp.id,
-        employeeName: emp.name,
-        type: state.selectedPunchType,
-        date,
-        time,
-        hash,
-        source: "App Mobile"
-      };
-
-      document.getElementById("emp-pin-input").value = "";
-
-      if (navigator.onLine) {
-        try {
-          await setDoc(doc(COL_PUNCHES, id), punchObj);
-          state.punches.push(punchObj);
-          saveLocalCache();
-          showReceipt(emp, punchObj, true);
-        } catch (err) {
-          state.offlineQueue.push(punchObj);
-          saveLocalCache();
-          showReceipt(emp, punchObj, false);
-        }
-      } else {
-        state.offlineQueue.push(punchObj);
-        saveLocalCache();
-        showReceipt(emp, punchObj, false);
-      }
-
-      updateNetworkUI();
-      renderEmployeeTodayPunches();
+      banner.className = "mt-2 px-3 py-2 rounded-xl bg-blue-50 border border-blue-200 text-center text-xs font-bold text-blue-800";
+      banner.textContent = `Colaborador: ${emp.name} (${emp.role || "Colaborador"})`;
+      renderEmployeeTodayPunches(emp.id);
     };
 
-    function showReceipt(emp, punch, synced) {
-      document.getElementById("rec-company").textContent = state.company.name;
-      document.getElementById("rec-name").textContent = emp.name;
-      document.getElementById("rec-role").textContent = emp.role || "Colaborador";
-      document.getElementById("rec-type").textContent = punch.type;
-      document.getElementById("rec-datetime").textContent = `${formatBRDate(punch.date)} às ${punch.time}`;
-      document.getElementById("rec-hash").textContent = punch.hash;
-      document.getElementById("rec-sync-note").textContent = synced
-        ? "✓ Sincronizado na nuvem"
-        : "⏳ Salvo offline (enviará ao voltar a rede)";
-      document.getElementById("modal-receipt").classList.remove("hidden-view");
-      safeIcons();
-    }
-
-    // ==================== PAINEL ADMINISTRATIVO ====================
-    window.switchAdminTab = function(tab) {
-      ["timesheet", "employees", "settings"].forEach(t => {
-        document.getElementById(`admin-tab-${t}`).classList.add("hidden-view");
-        const btn = document.getElementById(`tab-btn-${t}`);
-        btn.className = "px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap";
-      });
-      document.getElementById(`admin-tab-${tab}`).classList.remove("hidden-view");
-      const activeBtn = document.getElementById(`tab-btn-${tab}`);
-      activeBtn.className = "px-4 py-2.5 text-sm font-bold border-b-2 border-blue-600 text-blue-600 whitespace-nowrap";
-      safeIcons();
-    };
-
-    window.setQuickPeriod = function(mode) {
-      const now = new Date();
-      const y = now.getFullYear();
-      const m = String(now.getMonth() + 1).padStart(2, "0");
-      const today = todayISO();
-
-      let start = today;
-      let end = today;
-
-      if (mode === "7days") {
-        const d7 = new Date(now.getTime() - 6 * 86400000);
-        start = d7.toISOString().split("T")[0];
-      } else if (mode === "q1") {
-        start = `${y}-${m}-01`;
-        end = `${y}-${m}-15`;
-      } else if (mode === "q2") {
-        const lastDay = new Date(y, now.getMonth() + 1, 0).getDate();
-        start = `${y}-${m}-16`;
-        end = `${y}-${m}-${String(lastDay).padStart(2, "0")}`;
-      } else if (mode === "month") {
-        const lastDay = new Date(y, now.getMonth() + 1, 0).getDate();
-        start = `${y}-${m}-01`;
-        end = `${y}-${m}-${String(lastDay).padStart(2, "0")}`;
-      }
-
-      document.getElementById("filter-start-date").value = start;
-      document.getElementById("filter-end-date").value = end;
-      renderTimesheet();
-    };
-
-    window.renderTimesheet = function() {
-      const empFilter = document.getElementById("filter-emp").value;
-      const startDate = document.getElementById("filter-start-date").value;
-      const endDate = document.getElementById("filter-end-date").value;
-      const tbody = document.getElementById("timesheet-tbody");
-
-      document.getElementById("sheet-company-name").textContent = state.company.name;
-      document.getElementById("sheet-company-doc").textContent = `CNPJ: ${state.company.cnpj}`;
-      document.getElementById("sheet-period-label").textContent =
-        startDate && endDate ? `De ${formatBRDate(startDate)} até ${formatBRDate(endDate)}` : "Todos os dias";
-
-      let filtered = [...state.punches];
-      if (empFilter !== "ALL") filtered = filtered.filter(p => p.employeeId === empFilter);
-      if (startDate) filtered = filtered.filter(p => p.date >= startDate);
-      if (endDate) filtered = filtered.filter(p => p.date <= endDate);
-
-      if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400">Nenhum registro encontrado para os dias selecionados.</td></tr>`;
-        return;
-      }
-
-      const groups = new Map();
-      filtered.forEach(p => {
-        const key = `${p.date}__${p.employeeId}`;
-        if (!groups.has(key)) {
-          groups.set(key, {
-            date: p.date,
-            employeeId: p.employeeId,
-            employeeName: p.employeeName,
-            punches: []
-          });
-        }
-        groups.get(key).punches.push(p);
-      });
-
-      const sortedGroups = Array.from(groups.values()).sort((a, b) => {
-        if (a.date !== b.date) return b.date.localeCompare(a.date);
-        return (a.employeeName || "").localeCompare(b.employeeName || "");
-      });
-
-      tbody.innerHTML = sortedGroups.map(g => {
-        g.punches.sort((a, b) => a.time.localeCompare(b.time));
-        const empObj = state.employees.find(e => e.id === g.employeeId);
-        const expectedMins = ((empObj ? Number(empObj.dailyHours) : 8) || 8) * 60;
-
-        let workedMins = 0;
-        for (let i = 0; i < g.punches.length - 1; i += 2) {
-          const [h1, m1] = g.punches[i].time.split(":").map(Number);
-          const [h2, m2] = g.punches[i + 1].time.split(":").map(Number);
-          workedMins += Math.max(0, (h2 * 60 + m2) - (h1 * 60 + m1));
-        }
-
-        const wh = String(Math.floor(workedMins / 60)).padStart(2, "0");
-        const wm = String(workedMins % 60).padStart(2, "0");
-
-        const diff = workedMins - expectedMins;
-        const sign = diff >= 0 ? "+" : "-";
-        const absDiff = Math.abs(diff);
-        const dh = String(Math.floor(absDiff / 60)).padStart(2, "0");
-        const dm = String(absDiff % 60).padStart(2, "0");
-        const saldoClass = diff >= 0 ? "text-emerald-700 bg-emerald-50" : "text-red-700 bg-red-50";
-
-        const badges = g.punches.map(p => {
-          const c = p.type === "Entrada" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800";
-          return `
-            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-mono font-bold ${c} mr-1.5 mb-1">
-              ${p.type[0]}: ${p.time}
-              <button onclick="deletePunch('${p.id}')" title="Excluir batida" class="no-print hover:text-red-600 ml-0.5">×</button>
-            </span>
-          `;
-        }).join("");
-
-        return `
-          <tr class="hover:bg-slate-50/80">
-            <td class="py-3 px-3 font-mono text-xs font-semibold text-slate-700">${formatBRDate(g.date)}</td>
-            <td class="py-3 px-3 font-bold text-slate-800">${g.employeeName}</td>
-            <td class="py-3 px-3">${badges}</td>
-            <td class="py-3 px-3 font-mono font-bold text-slate-800">${wh}:${wm}h</td>
-            <td class="py-3 px-3">
-              <span class="px-2 py-0.5 rounded-md font-mono text-xs font-bold ${saldoClass}">${sign}${dh}:${dm}</span>
-            </td>
-            <td class="py-3 px-3 text-right no-print">
-              <button onclick="openManualPunchModal('${g.employeeId}', '${g.date}')" class="text-xs font-bold text-blue-600 hover:underline">+ Ajustar</button>
-            </td>
-          </tr>
-        `;
-      }).join("");
-    };
-
-    window.deletePunch = async function(id) {
-      try {
-        await deleteDoc(doc(COL_PUNCHES, id));
-        state.punches = state.punches.filter(p => p.id !== id);
-        saveLocalCache();
-        renderTimesheet();
-        showToast("Marcação removida.");
-      } catch (err) {
-        showToast("Erro ao remover batida.");
-      }
-    };
-
-    // ==================== CRUD FUNCIONÁRIOS ====================
-    window.openEmployeeModal = function(empId = null) {
-      document.getElementById("emp-edit-id").value = empId || "";
-      if (empId) {
-        const emp = state.employees.find(e => e.id === empId);
-        document.getElementById("modal-emp-title").textContent = "Editar Funcionário";
-        document.getElementById("emp-form-name").value = emp.name;
-        document.getElementById("emp-form-role").value = emp.role || "";
-        document.getElementById("emp-form-hours").value = emp.dailyHours || 8;
-        document.getElementById("emp-form-pin").value = emp.pin;
-      } else {
-        document.getElementById("modal-emp-title").textContent = "Novo Funcionário";
-        document.getElementById("emp-form-name").value = "";
-        document.getElementById("emp-form-role").value = "";
-        document.getElementById("emp-form-hours").value = 8;
-        document.getElementById("emp-form-pin").value = "";
-      }
-      document.getElementById("modal-employee").classList.remove("hidden-view");
-    };
-
-    window.saveEmployee = async function() {
-      const editId = document.getElementById("emp-edit-id").value;
-      const name = document.getElementById("emp-form-name").value.trim();
-      const role = document.getElementById("emp-form-role").value.trim() || "Colaborador";
-      const dailyHours = Number(document.getElementById("emp-form-hours").value) || 8;
-      const pin = document.getElementById("emp-form-pin").value.trim();
-
-      if (!name || pin.length !== 5 || isNaN(Number(pin))) {
-        showToast("Preencha o nome e um PIN numérico de 5 dígitos.");
-        return;
-      }
-
-      const id = editId || `emp_${Date.now()}`;
-      const empData = { id, name, role, dailyHours, pin };
-
-      try {
-        await setDoc(doc(COL_EMPLOYEES, id), empData);
-      } catch (err) {
-        console.error("Erro Firebase saveEmployee:", err);
-        showToast("Não foi possível conectar ao banco. Verifique sua internet.");
-        return;
-      }
-
-      const idx = state.employees.findIndex(e => e.id === id);
-      if (idx >= 0) state.employees[idx] = empData;
-      else state.employees.push(empData);
-      state.employees.sort((a, b) => a.name.localeCompare(b.name));
-      saveLocalCache();
-      refreshAllUI();
-      closeModal("modal-employee");
-      showToast("Funcionário salvo e sincronizado!");
-    };
-
-    window.deleteEmployee = async function(id) {
-      try {
-        await deleteDoc(doc(COL_EMPLOYEES, id));
-        state.employees = state.employees.filter(e => e.id !== id);
-        saveLocalCache();
-        refreshAllUI();
-        showToast("Funcionário excluído.");
-      } catch (err) {
-        showToast("Erro ao excluir funcionário.");
-      }
-    };
-
-    // ==================== PONTO MANUAL & CONFIGURAÇÕES ====================
-    window.openManualPunchModal = function(empId = "", date = "") {
-      const sel = document.getElementById("manual-emp-select");
-      sel.innerHTML = state.employees.map(e => `<option value="${e.id}">${e.name}</option>`).join("");
-      if (empId) sel.value = empId;
-      document.getElementById("manual-date").value = date || todayISO();
-      document.getElementById("manual-time").value = "08:00";
-      document.getElementById("modal-manual-punch").classList.remove("hidden-view");
-    };
-
-    window.saveManualPunch = async function() {
-      const empId = document.getElementById("manual-emp-select").value;
-      const date = document.getElementById("manual-date").value;
-      const time = document.getElementById("manual-time").value;
-      const type = document.getElementById("manual-type").value;
-      const emp = state.employees.find(e => e.id === empId);
-
-      if (!emp || !date || !time) {
-        showToast("Preencha todos os campos.");
-        return;
-      }
-
-      const id = `punch_${Date.now()}`;
-      const punchObj = {
-        id,
-        employeeId: emp.id,
-        employeeName: emp.name,
-        type,
-        date,
-        time,
-        hash: "MANUAL-RH",
-        source: "Painel Admin"
-      };
-
-      try {
-        await setDoc(doc(COL_PUNCHES, id), punchObj);
-      } catch (err) {
-        showToast("Erro ao salvar lançamento manual.");
-        return;
-      }
-
-      state.punches.push(punchObj);
-      saveLocalCache();
-      renderTimesheet();
-      closeModal("modal-manual-punch");
-      showToast("Ponto manual lançado com sucesso!");
-    };
-
-    window.saveCompanySettings = async function() {
-      const name = document.getElementById("set-company-name").value.trim() || "Minha Empresa Ltda";
-      const cnpj = document.getElementById("set-company-cnpj").value.trim() || "00.000.000/0001-00";
-      state.company = { name, cnpj };
-
-      try {
-        await setDoc(doc(COL_SETTINGS, "company"), state.company);
-      } catch (err) {
-        showToast("Erro ao salvar dados da empresa.");
-        return;
-      }
-
-      saveLocalCache();
-      refreshAllUI();
-      showToast("Dados da empresa atualizados!");
-    };
-
-    window.openResetConfirm = function(mode) {
-      state.pendingResetMode = mode;
-      document.getElementById("reset-confirm-desc").textContent = mode === "punches"
-        ? "Isso apagará todas as batidas de ponto registradas, mantendo os funcionários cadastrados."
-        : "Atenção: isso apagará TODAS as batidas e TODOS os funcionários cadastrados na nuvem.";
-      document.getElementById("modal-reset-confirm").classList.remove("hidden-view");
-    };
-
-    window.executeResetData = async function() {
-      try {
-        for (const p of state.punches) {
-          await deleteDoc(doc(COL_PUNCHES, p.id));
-        }
-        state.punches = [];
-        state.offlineQueue = [];
-
-        if (state.pendingResetMode === "all") {
-          for (const e of state.employees) {
-            await deleteDoc(doc(COL_EMPLOYEES, e.id));
-          }
-          state.employees = [];
-        }
-
-        saveLocalCache();
-        refreshAllUI();
-        closeModal("modal-reset-confirm");
-        showToast("Base de dados zerada com sucesso!");
-      } catch (err) {
-        showToast("Erro ao limpar dados na nuvem.");
-      }
-    };
-
-    // ==================== ATUALIZAÇÃO GERAL DA TELA ====================
-    function refreshAllUI() {
-      document.getElementById("emp-company-header").textContent = state.company.name;
-      document.getElementById("set-company-name").value = state.company.name;
-      document.getElementById("set-company-cnpj").value = state.company.cnpj;
-
-      const empSel = document.getElementById("emp-select");
-      const currentVal = empSel.value;
-      empSel.innerHTML = `<option value="">-- Escolha seu nome --</option>` +
-        state.employees.map(e => `<option value="${e.id}">${e.name} (${e.role || "Colaborador"})</option>`).join("");
-      if (state.employees.some(e => e.id === currentVal)) empSel.value = currentVal;
-
-      const filterSel = document.getElementById("filter-emp");
-      const curFilter = filterSel.value;
-      filterSel.innerHTML = `<option value="ALL">Todos os Colaboradores</option>` +
-        state.employees.map(e => `<option value="${e.id}">${e.name}</option>`).join("");
-      if (curFilter === "ALL" || state.employees.some(e => e.id === curFilter)) filterSel.value = curFilter;
-
-      document.getElementById("admin-emp-count").textContent = state.employees.length;
-      const empTbody = document.getElementById("employees-tbody");
-      if (state.employees.length === 0) {
-        empTbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">Nenhum funcionário cadastrado ainda. Clique em "Novo Funcionário".</td></tr>`;
-      } else {
-        empTbody.innerHTML = state.employees.map(e => `
-          <tr class="hover:bg-slate-50">
-            <td class="py-3 px-4 font-bold text-slate-800">${e.name}</td>
-            <td class="py-3 px-4 text-slate-600">${e.role || "Colaborador"}</td>
-            <td class="py-3 px-4 text-slate-600">${e.dailyHours || 8}h / dia</td>
-            <td class="py-3 px-4 font-mono font-bold text-blue-700">${e.pin}</td>
-            <td class="py-3 px-4 text-right space-x-2">
-              <button onclick="openEmployeeModal('${e.id}')" class="text-xs font-bold text-blue-600 hover:underline">Editar</button>
-              <button onclick="deleteEmployee('${e.id}')" class="text-xs font-bold text-red-600 hover:underline">Excluir</button>
-            </td>
-          </tr>
-        `).join("");
-      }
-
-      renderEmployeeTodayPunches();
-      renderTimesheet();
-      safeIcons();
-    }
-
-    // ==================== RELÓGIO & PWA ====================
-    function startLiveClock() {
-      const update = () => {
-        const now = new Date();
-        document.getElementById("live-clock").textContent = now.toTimeString().slice(0, 8);
-        document.getElementById("live-date").textContent = now.toLocaleDateString("pt-BR", {
-          weekday: "long", day: "2-digit", month: "long", year: "numeric"
-        });
-      };
-      update();
-      setInterval(update, 1000);
-    }
-
-    function setupPWA() {
-      const canvas = document.createElement("canvas");
-      canvas.width = 512;
-      canvas.height = 512;
-      const ctx = canvas.getContext("2d");
-      ctx.fillStyle = "#0f172a";
-      ctx.fillRect(0, 0, 512, 512);
-      ctx.fillStyle = "#2563eb";
-      ctx.beginPath();
-      ctx.arc(256, 256, 170, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = "#ffffff";
-      ctx.lineWidth = 24;
-      ctx.lineCap = "round";
-      ctx.beginPath();
-      ctx.moveTo(256, 256);
-      ctx.lineTo(256, 155);
-      ctx.moveTo(256, 256);
-      ctx.lineTo(335, 256);
-      ctx.stroke();
-
-      document.getElementById("dynamic-apple-icon").href = canvas.toDataURL("image/png");
-
-      window.addEventListener("beforeinstallprompt", (e) => {
-        e.preventDefault();
-        state.deferredInstallPrompt = e;
-        document.getElementById("btn-install-pwa-text").textContent = "Instalar Agora";
-      });
-    }
-
-    window.triggerPWAInstall = async function() {
-      if (state.deferredInstallPrompt) {
-        state.deferredInstallPrompt.prompt();
-        await state.deferredInstallPrompt.userChoice;
-        state.deferredInstallPrompt = null;
-      } else {
-        showToast("No Chrome, toque nos 3 pontinhos (⋮) e escolha 'Instalar aplicativo'.");
-      }
-    };
-
-    // ==================== INICIALIZAÇÃO ====================
-    window.addEventListener("online", () => {
-      updateNetworkUI();
-      fetchFromServer(true);
-    });
-    window.addEventListener("offline", updateNetworkUI);
-    document.addEventListener("visibilitychange", () => {
-      if (!document.hidden) fetchFromServer(false);
-    });
-
-    setQuickPeriod("month");
-    startLiveClock();
-    setupPWA();
-    refreshAllUI();
-    updateNetworkUI();
-    startRealtimeListeners();
-    fetchFromServer(false);
-    safeIcons();
-  </script>
-</body>
-</html>
+    function renderEmployeeTodayPunches(empId) {
+      const listEl = document.getElementById("emp-today-list");
+      const countEl = document.getElementById
